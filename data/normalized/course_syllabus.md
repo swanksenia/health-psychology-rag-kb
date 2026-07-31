@@ -1,5 +1,5 @@
 <!-- document_id: health_psychology_course_syllabus -->
-<!-- source_file: PSYC 1111 Syllabus_2510 (1).pdf -->
+<!-- source_file: data/raw/course_syllabus.pdf -->
 <!-- title: Syllabus for Introduction to Health Psychology -->
 <!-- course_id: PSYC_1111 -->
 <!-- document_type: syllabus -->
