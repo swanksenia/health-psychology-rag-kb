@@ -1,15 +1,27 @@
 # The behaviour change wheel: A new method for characterising and designing behaviour change interventions
 
-## Document metadata
-
-- **Authors:** Susan Michie, Maartje M. van Stralen, Robert West
-- **Year:** 2011
-- **Journal:** Implementation Science
-- **DOI:** 10.1186/1748-5908-6-42
-- **PMCID:** PMC3096582
-- **PMID:** 21513547
-- **Source:** https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/
-- **License:** CC BY 2.0
+<!-- document_id: michie_2011_behaviour_change_wheel -->
+<!-- source_file: michie_2011_behaviour_change_wheel.html -->
+<!-- source_path: data/raw/michie_2011_behaviour_change_wheel.html -->
+<!-- source_url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/ -->
+<!-- title: The behaviour change wheel: A new method for characterising and designing behaviour change interventions -->
+<!-- authors: Susan Michie; Maartje M. van Stralen; Robert West -->
+<!-- publication_year: 2011 -->
+<!-- journal: Implementation Science -->
+<!-- volume: 6 -->
+<!-- article_number: 42 -->
+<!-- doi: 10.1186/1748-5908-6-42 -->
+<!-- pmcid: PMC3096582 -->
+<!-- pmid: 21513547 -->
+<!-- source_type: html -->
+<!-- document_type: journal_article -->
+<!-- content_role: core_behaviour_change_framework -->
+<!-- domain: health_psychology -->
+<!-- language: en -->
+<!-- access_level: open_access -->
+<!-- license: CC BY 2.0 -->
+<!-- figure_count: 2 -->
+<!-- table_count: 3 -->
 
 ## Abstract
 
