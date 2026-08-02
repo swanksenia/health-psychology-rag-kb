@@ -142,3 +142,139 @@ Beyond the core homework requirements, the project also includes:
 - embeddings in `data/processed/embeddings.npy`;
 - a FAISS vector index in `data/processed/faiss.index`;
 - a successful semantic-search test over all 474 chunks.
+
+---
+
+## Homework 2 — Basic Semantic Retrieval Layer
+
+### Goal
+
+Build a baseline semantic retrieval layer for the PSYC 1111 Health Psychology knowledge base using the chunks prepared in Homework 1.
+
+### Retrieval pipeline
+
+```text
+chunks.jsonl
+→ embedding generation
+→ L2 normalization
+→ FAISS vector index
+→ query embedding
+→ top-k semantic search
+→ retrieved chunks with scores and metadata
+```
+
+### Implementation
+
+- **Embedding model:** `sentence-transformers/all-MiniLM-L6-v2`
+- **Embedding dimension:** `384`
+- **Vector index:** FAISS `IndexFlatIP`
+- **Similarity approach:** inner product over L2-normalized vectors, which behaves like cosine similarity
+- **Number of indexed chunks:** `474`
+- **Default top-k:** `3`
+
+The same embedding model is used for both knowledge-base chunks and user queries.
+
+FAISS stores the vectors, while chunk text and metadata remain in JSONL format. The position of each vector in the index corresponds to the position of the related chunk in `chunks_for_retrieval.jsonl`.
+
+### Input
+
+```text
+data/processed/chunks.jsonl
+```
+
+Each chunk includes:
+
+- `chunk_id`
+- `document_id`
+- `source_file`
+- `chunk_index`
+- `section`
+- `text`
+
+### Generated artifacts
+
+```text
+data/processed/chunks_for_retrieval.jsonl
+index/embeddings.npy
+index/faiss.index
+outputs/retrieval_examples.md
+data/notebooks/HW2_Semantic_Retrieval.ipynb
+```
+
+### Running the notebook
+
+Open the following notebook in Google Colab:
+
+```text
+data/notebooks/HW2_Semantic_Retrieval.ipynb
+```
+
+The notebook is organized into stages:
+
+1. environment setup;
+2. connection to the private GitHub repository;
+3. loading Homework 1 chunks;
+4. embeddings and similarity demonstration;
+5. FAISS index creation;
+6. semantic search;
+7. retrieval evaluation;
+8. conclusion.
+
+Run the cells in order from top to bottom.
+
+The notebook requires:
+
+```text
+sentence-transformers==3.0.1
+faiss-cpu==1.8.0.post1
+numpy==1.26.4
+```
+
+### Retrieval evaluation
+
+The retrieval layer was evaluated using six representative queries covering:
+
+- the biopsychosocial model;
+- the COM-B model;
+- the Behaviour Change Wheel;
+- the 3P model of disease;
+- stress and physical health;
+- Health Psychology course topics.
+
+For every query, the system returns:
+
+- rank;
+- similarity score;
+- `chunk_id`;
+- document and source metadata;
+- section;
+- text preview.
+
+Detailed top-3 results and relevance comments are available in:
+
+```text
+outputs/retrieval_examples.md
+```
+
+### Results
+
+The baseline semantic retrieval layer performs well for focused conceptual questions about clearly named Health Psychology models and topics.
+
+Retrieval was especially effective for questions about:
+
+- the biopsychosocial model;
+- the Behaviour Change Wheel;
+- the 3P model;
+- stress and physical health.
+
+Retrieval was weaker for broad navigational questions and questions requiring an exact list from a specific document.
+
+### Current limitations
+
+The current implementation uses semantic vector similarity only. It does not yet include:
+
+- metadata filtering;
+- hybrid lexical and semantic search;
+- reranking;
+- query rewriting;
+- LLM-generated answers.
