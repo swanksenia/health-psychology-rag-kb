@@ -278,3 +278,39 @@ The current implementation uses semantic vector similarity only. It does not yet
 - reranking;
 - query rewriting;
 - LLM-generated answers.
+
+## Homework 3 — Improved Retrieval
+
+The retrieval pipeline was evaluated using the same six queries from Homework 2.
+
+### Retrieval methods
+
+- baseline semantic retrieval with FAISS;
+- metadata filtering by document type;
+- simple hybrid reranking using:
+  - 70% semantic similarity;
+  - 30% keyword overlap.
+
+### Evaluation results
+
+- Baseline Top-1 accuracy: 83.3%;
+- Improved Top-1 accuracy: 100%;
+- Baseline Recall@3: 100%;
+- Improved Recall@3: 100%.
+
+Metadata filtering produced the main improvement by moving the course syllabus from rank two to rank one for the course-topics query.
+
+Hybrid reranking changed the order of some chunks but did not further improve document-level accuracy.
+
+### Files
+
+- `scripts/retrieval_improved.py`
+- `outputs/retrieval_comparison.md`
+- `outputs/baseline_results.json`
+- `outputs/improved_results.json`
+
+Run the improved retrieval pipeline with:
+
+```bash
+python scripts/retrieval_improved.py
+```

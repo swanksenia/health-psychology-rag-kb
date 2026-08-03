@@ -1,0 +1,254 @@
+[
+  {
+    "query": "What is the biopsychosocial model of health?",
+    "expected_document": "ogden_2019_health_psychology",
+    "results": [
+      {
+        "score": 0.7959495782852173,
+        "chunk_id": "ogden_2019_health_psychology__0013",
+        "text": "smoking), pressures to change behavior (e.g. peer group expectations, parental pressure), social values on health (e.g. whether health was regarded as a good or a bad thing), social class, the environment, and ethnicity. #### Fig 1 The biopsychosocial model of health and illness (after Engel 1977, 1980) ![Fig 1 The biopsychosocial model of health and illness (after Engel 1977, 1980)](assets/ogden_p7_figure_1.png) Figure description: The biopsychosocial model explains health and illness through the interaction of biological, psychological, and social factors.",
+        "metadata": {
+          "document_id": "ogden_2019_health_psychology",
+          "source_file": "data/raw/ogden_2019_health_psychology.pdf",
+          "section": "1.The Biopsychosocial Model",
+          "chunk_index": 13,
+          "document_type": "textbook"
+        }
+      },
+      {
+        "score": 0.7779132723808289,
+        "chunk_id": "wright_2019_3p_disease_model__0010",
+        "text": "and disease are conceptualized or managed today ([Kontos, 2011](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#B55)). This could be, in part, because the biopsychosocial model lacks a framework for understanding *how* biological, psychological, and socio-environmental factors may contribute at each stage of disease development, in maintaining disease, or in the treatment of disease. While the biopsychosocial model may help in stating that multiple disciplines contribute to health and disease, more theoretical work is needed to conceptualize and explicate *how* interdisciplinary factors – including psychological and behavioral ones – contribute to the etiology, maintenance, and treatment of disease states and conditions.",
+        "metadata": {
+          "document_id": "wright_2019_3p_disease_model",
+          "source_file": "data/raw/wright_2019_3p_disease_model.html",
+          "section": "Introduction",
+          "chunk_index": 10,
+          "document_type": "research_article"
+        }
+      },
+      {
+        "score": 0.7734689712524414,
+        "chunk_id": "wright_2019_3p_disease_model__0007",
+        "text": "factors in health and disease ([Engel, 1977](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#B28); [Borrell-Carrió et al., 2004](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#B11)). The biopsychosocial model was developed as a response, in part, to biological reductionism ([Engel, 1977](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#B28)) and has played an integral role across multiple disciplines including health psychology and behavioral medicine ([Taylor, 2018](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#B108)).",
+        "metadata": {
+          "document_id": "wright_2019_3p_disease_model",
+          "source_file": "data/raw/wright_2019_3p_disease_model.html",
+          "section": "Introduction",
+          "chunk_index": 7,
+          "document_type": "research_article"
+        }
+      }
+    ]
+  },
+  {
+    "query": "What are the components of the COM-B model?",
+    "expected_document": "michie_2011_behaviour_change_wheel",
+    "results": [
+      {
+        "score": 0.407795786857605,
+        "chunk_id": "michie_2011_behaviour_change_wheel__0032",
+        "text": "[1](https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/#F1) represent potential influence between components in the system. For example, opportunity can influence motivation as can capability; enacting a behaviour can alter capability, motivation, and opportunity. #### Figure 1 ![The COM-B system - a framework for understanding behaviour](assets/michie_2011_figure_1.jpeg) **Figure caption:** The COM-B system - a framework for understanding behaviour. A given intervention might change one or more components in the behaviour system. The causal links within the system can work to reduce or amplify the effect of particular interventions by leading to changes elsewhere. While this is a model of behaviour, it also provides a basis for designing interventions aimed at behaviour change.",
+        "metadata": {
+          "document_id": "michie_2011_behaviour_change_wheel",
+          "source_file": "data/raw/michie_2011_behaviour_change_wheel.html",
+          "section": "Establishing criteria of usefulness",
+          "chunk_index": 32,
+          "document_type": "research_article"
+        }
+      },
+      {
+        "score": 0.3625877797603607,
+        "chunk_id": "michie_2011_behaviour_change_wheel__0040",
+        "text": "The new framework was developed by tabulating the full set of intervention categories that had been identified and establishing links between intervention characteristics and components of the COM-B system that may need to be changed. The definitions and conceptualisation of the intervention categories were refined through discussion and by consulting the American Psychological Association's Dictionary of Psychology and the Oxford English Dictionary. The resulting framework was then compared with the existing ones in terms of the criteria of usefulness (*i.e*., met or not met).",
+        "metadata": {
+          "document_id": "michie_2011_behaviour_change_wheel",
+          "source_file": "data/raw/michie_2011_behaviour_change_wheel.html",
+          "section": "Develop a new framework",
+          "chunk_index": 40,
+          "document_type": "research_article"
+        }
+      },
+      {
+        "score": 0.3396646976470947,
+        "chunk_id": "michie_2011_behaviour_change_wheel__0060",
+        "text": "[2](https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/#T2) and [3](https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/#T3)). #### Table 2. Links between the components of the 'COM-B' model of behaviour and the intervention functions | Model of behaviour: sources | Education | Persuasion | Incentivisation | Coercion | Training | Restriction | Environmental restructuring | Modelling | Enablement | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | C-Ph | | | | | √ | | | | √ | | C-Ps | √ | | | | √ | | | | √ | | M-Re | √ | √ | √ | √ | | | | | | | M-Au | | √ | √ | √ | | | √ | √ | √ | | O-Ph | | | | | | √ | √ | | √ | | O-So | | | | | | √ | √ | | √ | **Table notes:** - 1.",
+        "metadata": {
+          "document_id": "michie_2011_behaviour_change_wheel",
+          "source_file": "data/raw/michie_2011_behaviour_change_wheel.html",
+          "section": "Development of a new framework",
+          "chunk_index": 60,
+          "document_type": "research_article"
+        }
+      }
+    ]
+  },
+  {
+    "query": "How does the Behaviour Change Wheel support intervention design?",
+    "expected_document": "michie_2011_behaviour_change_wheel",
+    "results": [
+      {
+        "score": 0.657774806022644,
+        "chunk_id": "michie_2011_behaviour_change_wheel__0059",
+        "text": "Figure 2 ![The Behaviour Change Wheel](assets/michie_2011_figure_2.jpeg) **Figure caption:** The Behaviour Change Wheel. Having established the structure of the new framework, the next step was to link the components of the behaviour system to the intervention functions and to link these to policy categories using the approach described in the Methods section. This led to a framework that met the third criterion of linkage with an overarching model of behaviour change (Tables [2](https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/#T2) and [3](https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/#T3)). #### Table 2.",
+        "metadata": {
+          "document_id": "michie_2011_behaviour_change_wheel",
+          "source_file": "data/raw/michie_2011_behaviour_change_wheel.html",
+          "section": "Development of a new framework",
+          "chunk_index": 59,
+          "document_type": "research_article"
+        }
+      },
+      {
+        "score": 0.5960958003997803,
+        "chunk_id": "michie_2011_behaviour_change_wheel__0079",
+        "text": "a range of theoretical approaches each of which independently addresses different aspects of the behaviour in question. The BCW is being developed into a theory- and evidence-based tool allowing a range of users to design and select interventions and policies according to an analysis of the nature of the behaviour, the mechanisms that need to be changed in order to bring about behaviour change, and the interventions and policies required to change those mechanisms. An ongoing programme of research is developing an 'intervention design tool' based on the BCW. It starts with a theoretical understanding of behaviour to determine what needs to change in order for the behavioural target to be achieved, and what intervention functions are likely to be effective to bring about that change.",
+        "metadata": {
+          "document_id": "michie_2011_behaviour_change_wheel",
+          "source_file": "data/raw/michie_2011_behaviour_change_wheel.html",
+          "section": "Discussion",
+          "chunk_index": 79,
+          "document_type": "research_article"
+        }
+      },
+      {
+        "score": 0.5939466953277588,
+        "chunk_id": "michie_2011_behaviour_change_wheel__0058",
+        "text": "Given that policies can only influence behaviour through the interventions that they enable or support, it seemed appropriate to place interventions between these and behaviour. The most parsimonious way of doing this seemed to be to represent the whole classification system in terms of a 'behaviour change wheel' (BCW) with three layers as shown in Figure [2](https://pmc.ncbi.nlm.nih.gov/articles/PMC3096582/#F2). This is not a linear model in that components within the behaviour system interact with each other as do the functions within the intervention layer and the categories within the policy layer. #### Figure 2 ![The Behaviour Change Wheel](assets/michie_2011_figure_2.jpeg) **Figure caption:** The Behaviour Change Wheel.",
+        "metadata": {
+          "document_id": "michie_2011_behaviour_change_wheel",
+          "source_file": "data/raw/michie_2011_behaviour_change_wheel.html",
+          "section": "Development of a new framework",
+          "chunk_index": 58,
+          "document_type": "research_article"
+        }
+      }
+    ]
+  },
+  {
+    "query": "What are the predisposing, precipitating, and perpetuating factors in the 3P model?",
+    "expected_document": "wright_2019_3p_disease_model",
+    "results": [
+      {
+        "score": 0.679078996181488,
+        "chunk_id": "wright_2019_3p_disease_model__0016",
+        "text": "[Spielman et al. (1987)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#B104) and is colloquially known as “the 3P Model.” The three Ps – predisposing, precipitating, and perpetuating factors – all contribute to the development and maintenance of chronic insomnia. [Figure 1](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#F1) displays an adapted version of the 3P model as originally depicted by [Spielman et al. (1987)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6879427/#B104). #### Figure 1 ![The 3P-Disease Model](assets/wright_2019_figure_1.jpeg) **Figure caption:** The 3P-Disease Model. The *x*-axis represents time and the *y*-axis represents the propensity toward disease manifestation. Reuse/adapted from The Psychiatric Clinics of North America, volume 10, A.J. Spielman, L.S.",
+        "metadata": {
+          "document_id": "wright_2019_3p_disease_model",
+          "source_file": "data/raw/wright_2019_3p_disease_model.html",
+          "section": "Insomnia and the 3P Model",
+          "chunk_index": 16,
+          "document_type": "research_article"
+        }
+      },
+      {
+        "score": 0.628414511680603,
+        "chunk_id": "wright_2019_3p_disease_model__0104",
+        "text": "factors mentioned above, and the presence and specific type of perpetuating factors will vary from patient to patient. What would be important in an individual with no current perpetuating factors is a primary focus on the prevention and/or mitigation phases of the 3P model, depending on the “modifiability” of the relevant predisposing and precipitating factors (with genetic predisposition clearly being non-modifiable, but level of education being at least *somewhat* modifiable). In the context of heart disease, the 3P model has clear applications for understanding relevant risk factors and related behaviors that contribute to an increased likelihood of CAD.",
+        "metadata": {
+          "document_id": "wright_2019_3p_disease_model",
+          "source_file": "data/raw/wright_2019_3p_disease_model.html",
+          "section": "Examples of 3P-Health Model Applications to Specific Diseases",
+          "chunk_index": 104,
+          "document_type": "research_article"
+        }
+      },
+      {
+        "score": 0.5930147171020508,
+        "chunk_id": "wright_2019_3p_disease_model__0113",
+        "text": "integrated perspectives when studying, preventing, mitigating, or treating a variety of disease states and conditions. In terms of research, scientists might utilize the 3P disease model to conceptualize and identify actual predisposing, precipitating, and perpetuating factors for these and many other diseases. In this way, the model provides a framework for understanding where each discovered component “fits in,” or the mechanisms in the etiology of various disease states. Relatedly, the model encourages future researchers to think about “What *are* the predisposing, precipitating, and perpetuating factors of x, y, or z disease?,” and “In what ways can each be treated by a psychologist or with a psychologist integrated into another team such as dieticians, physicians, physical",
+        "metadata": {
+          "document_id": "wright_2019_3p_disease_model",
+          "source_file": "data/raw/wright_2019_3p_disease_model.html",
+          "section": "Discussion and Implications for the Future",
+          "chunk_index": 113,
+          "document_type": "research_article"
+        }
+      }
+    ]
+  },
+  {
+    "query": "How can stress affect physical health?",
+    "expected_document": "ogden_2019_health_psychology",
+    "results": [
+      {
+        "score": 0.7073327302932739,
+        "chunk_id": "ogden_2019_health_psychology__0135",
+        "text": "reasons that stress has been studied so consistently is because of its potential effect on the health of the individual. In particular, research shows a link between high-stress jobs and hypertension and coronary heart disease; higher life stress and physical symptoms; that stressful lives are associated with greater recurrence of colds and flu; and that there is a link between stress and mortality. For example, Phillips, Der, and Carroll (2008) reported from their longitudinal study of 968 men and women aged 56, that the number of health-related life events at baseline and their stress load predicted mortality by 17 years (266 participants had died). Stress can cause illness through either a direct or indirect pathway.",
+        "metadata": {
+          "document_id": "ogden_2019_health_psychology",
+          "source_file": "data/raw/ogden_2019_health_psychology.pdf",
+          "section": "Overview",
+          "chunk_index": 135,
+          "document_type": "textbook"
+        }
+      },
+      {
+        "score": 0.6414798498153687,
+        "chunk_id": "ogden_2019_health_psychology__0167",
+        "text": "Stress and pain are part of the continuum from health to illness and illustrate the key role of psychological factors in the processes involved in becoming ill. Stress is far more than a response to a stressor and in line with the transactional model of stress illustrates a role for appraisal. Stress can cause illness through either a direct pathway (via physiological changes) or the indirect pathway (via behavior change). The impact of stress on illness illustrates a further role for psychological factors as it is moderated by coping, social support, personality, and control. In a similar way, pain is also a perception and the pain experience is influenced by psychological factors.",
+        "metadata": {
+          "document_id": "ogden_2019_health_psychology",
+          "source_file": "data/raw/ogden_2019_health_psychology.pdf",
+          "section": "To Conclude",
+          "chunk_index": 167,
+          "document_type": "textbook"
+        }
+      },
+      {
+        "score": 0.6339620351791382,
+        "chunk_id": "ogden_2019_health_psychology__0136",
+        "text": "mortality by 17 years (266 participants had died). Stress can cause illness through either a direct or indirect pathway. The direct pathway involves stress-related changes in physiology such as raised blood pressure, raised heart rate, reduced immune function or cortisol production. The indirect pathway involves changes in health behaviors such as sleep, diet, smoking, or exercise which in turn cause poor health. These pathways are illustrated in Fig 2. #### Figure 2: The Stress Illness Link: Direct and Indirect Pathways ![Figure 2: The Stress Illness Link: Direct and Indirect Pathways](assets/ogden_p55_figure_2.png) Figure description: Stress can affect illness directly through physiological changes and indirectly through changes in health behaviors.",
+        "metadata": {
+          "document_id": "ogden_2019_health_psychology",
+          "source_file": "data/raw/ogden_2019_health_psychology.pdf",
+          "section": "Overview",
+          "chunk_index": 136,
+          "document_type": "textbook"
+        }
+      }
+    ]
+  },
+  {
+    "query": "What topics are covered in the Health Psychology course?",
+    "expected_document": "health_psychology_course_syllabus",
+    "results": [
+      {
+        "score": 0.6866247653961182,
+        "chunk_id": "ogden_2019_health_psychology__0245",
+        "text": "It has long been recognized that physical illness can have psychological consequences. This course has highlighted how psychology is relevant to all stages of illness from being well, to becoming ill, to being ill, and to health outcomes. Health psychology has a simple STORY which is often similar for different areas: “traditional models say health and illness are about knowledge and biology BUT health psychology says it is also about psychology”. So in terms of the areas covered on this course the stories are: - Health and illness relate to behavior not just biology - Behavior relates not only to knowledge but also to beliefs - Behavior can be changed by changing beliefs - People also have beliefs about illness which influence their illness experience - Illness beliefs influence",
+        "metadata": {
+          "document_id": "ogden_2019_health_psychology",
+          "source_file": "data/raw/ogden_2019_health_psychology.pdf",
+          "section": "Final Take-Home Message",
+          "chunk_index": 245,
+          "document_type": "textbook"
+        }
+      },
+      {
+        "score": 0.6764018535614014,
+        "chunk_id": "health_psychology_course_syllabus__0000",
+        "text": "Syllabus for Introduction to Health Psychology Credits: 3 PSYC 1111 Instructor Contact Information: You can always send your instructor a private message through the Brightspace Messaging system, accessible via the envelope (Messages) icon in the top navigation bar. Once logged into your course, click your instructor’s profile page to see all the ways you can communicate with them, including their email address. Course Description Health psychology focuses on the dynamic interaction between biological, social, and psychological factors that influence physical health and illness, aiming to promote overall well-being and prevent diseases. This course is designed to provide students with an introduction to the field of health psychology.",
+        "metadata": {
+          "document_id": "health_psychology_course_syllabus",
+          "source_file": "data/raw/course_syllabus.pdf",
+          "section": "Document overview",
+          "chunk_index": 0,
+          "document_type": "syllabus"
+        }
+      },
+      {
+        "score": 0.6129629015922546,
+        "chunk_id": "ogden_2019_health_psychology__0005",
+        "text": "Health psychology is the study of the role of psychology in any physical health problem including coughs and colds, cancer, coronary heart disease, HIV, obesity, and diabetes. It is best understood by comparing it to the more traditional biomedical model using 5 simple questions as follows:",
+        "metadata": {
+          "document_id": "ogden_2019_health_psychology",
+          "source_file": "data/raw/ogden_2019_health_psychology.pdf",
+          "section": "The Background of Health Psychology",
+          "chunk_index": 5,
+          "document_type": "textbook"
+        }
+      }
+    ]
+  }
+]
