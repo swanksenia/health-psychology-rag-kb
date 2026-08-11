@@ -358,3 +358,46 @@ Rule-Based Router
     └── clarification
            ↓
         Clarification response
+```
+
+### Routes
+- course_content — retrieves relevant Health Psychology course content.
+- course_structure — retrieves syllabus-specific information.
+- clarification — handles questions that cannot be mapped to the supported workflows.
+
+### Tools
+- retrieve_course_content
+- retrieve_course_structure
+- gemini_generate_content
+
+### State
+The workflow maintains a simple state object containing:
+``` bash
+{
+    "user_goal": question,
+    "selected_route": None,
+    "tool_calls": [],
+    "observations": [],
+    "final_answer": None
+}
+```
+### Prompt experiments
+
+The workflow compares:
+
+- a weak RAG prompt;
+- a grounded RAG prompt with explicit context boundaries;
+- source chunk citations;
+- a deterministic fallback response when the retrieved context is insufficient.
+
+### Test examples
+
+Five workflow examples are available in:
+``` bash
+outputs/agent_flow_examples.md
+```
+The implementation notebook is available in:
+
+``` bash
+data/notebooks/HW4_Agentic_Prompt_Workflow.ipynb
+```
