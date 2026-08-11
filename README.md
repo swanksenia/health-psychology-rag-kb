@@ -314,3 +314,47 @@ Run the improved retrieval pipeline with:
 ```bash
 python scripts/retrieval_improved.py
 ```
+## Homework 4 — Agentic Prompt Workflow
+
+### Domain and use case
+
+This agentic workflow extends the Health Psychology RAG project.
+
+The agent helps users with:
+- Health Psychology course-content questions;
+- course-structure and syllabus questions;
+- unsupported or unclear requests through a clarification route.
+
+### Workflow
+
+```text
+User Question
+    ↓
+Rule-Based Router
+    ├── course_content
+    │      ↓
+    │   retrieve_course_content
+    │      ↓
+    │   Retrieved course chunks
+    │      ↓
+    │   Grounded prompt
+    │      ↓
+    │   Gemini
+    │      ↓
+    │   Final answer
+    │
+    ├── course_structure
+    │      ↓
+    │   retrieve_course_structure
+    │      ↓
+    │   Syllabus-only chunks
+    │      ↓
+    │   Grounded prompt
+    │      ↓
+    │   Gemini
+    │      ↓
+    │   Final answer
+    │
+    └── clarification
+           ↓
+        Clarification response
