@@ -1,200 +1,197 @@
 # Agent Flow Examples
 
-## Example 1 — Supported course-content question
+These examples show the execution trace of the Health Psychology & Chronic Back Pain Assistant.
 
-**Question:**  
-What is the biopsychosocial model of health?
 
-**Route:**  
-`course_content`
+## Example 1
 
-**Tools called:**  
-- `retrieve_course_content`
-- `gemini_generate_content`
+### Question
 
-**Retrieved chunks:**  
-- `ogden_2019_health_psychology__0013`
-- `wright_2019_3p_disease_model__0010`
-- `wright_2019_3p_disease_model__0007`
+How to change harmful behavior?
 
-**Observation:**  
-The agent routed the question to the `course_content` workflow, retrieved relevant Health Psychology chunks, and generated a grounded answer with source references.
+### Route
 
-**Final answer:**  
-Based on the provided course materials, the biopsychosocial model of health is defined as follows:
+`psychoeducation`
 
-* **Core Definition:** It is a model that explains health and illness through the interaction of biological, psychological, and social factors (Source chunk ID: `ogden_2019_health_psychology__0013`). 
-* **Origin and Role:** It was developed, in part, as a response to biological reductionism and plays an integral role across multiple disciplines, including health psychology and behavioral medicine (Source chunk ID: `wright_2019_3p_disease_model__0007`).
-* **Characteristics and Limitations:** While the model states that multiple disciplines contribute to health and disease, it lacks a specific framework for understanding *how* these biological, psychological, and socio-environmental factors contribute at each stage of disease development, maintenance, or treatment (Source chunk ID: `wright_2019_3p_disease_model__0010`).
+### Tool called
 
----
+- search_knowledge_base: {'query': 'How to change harmful behavior?'}
 
-## Example 2 — Weak vs grounded prompt
+### Observation
 
-**Question:**  
-What is the biopsychosocial model of health?
+- search_knowledge_base: success=True, result_count=3, chunks=['michie_2011_behaviour_change_wheel__0021', 'ogden_2019_health_psychology__0068', 'michie_2011_behaviour_change_wheel__0033']
 
-### Weak prompt
+### State after workflow
 
-Based on the provided context, the biopsychosocial model of health:
+- user_goal: understand a health psychology topic using scientific evidence
+- selected_route: psychoeducation
+- plan: ['search_knowledge_base', 'build_final_answer']
+- completed_steps: ['classify_request', 'build_plan', 'search_knowledge_base', 'build_final_answer']
+- health_psychology_topics: ['behavior', 'harmful behavior']
+- physical_back_pain_request: False
+- spine_condition_detected: False
+- medical_advice_requested: False
+- care_pathway_needed: False
+- fallback_used: True
 
-* **Explains health and illness** through the interaction of biological, psychological, and social (or socio-environmental) factors.
-* **Was developed as a response**, in part, to biological reductionism.
-* **States that multiple disciplines contribute to health and disease**, playing an integral role across various fields, including health psychology and behavioral medicine.
-* **Lacks a framework** (as noted by some critics) for understanding *how* these biological, psychological, and socio-environmental factors contribute to each stage of disease development, maintenance, or treatment.
+### Final answer
 
-### Grounded prompt
+LLM synthesis is temporarily unavailable because the API quota was exceeded. Relevant evidence was successfully retrieved from the knowledge base.
 
-Based on the provided course materials, the biopsychosocial model is a model that:
 
-* Explains health and illness through the interaction of biological, psychological, and social (or socio-environmental) factors (Source: ogden_2019_health_psychology__0013, wright_2019_3p_disease_model__0010).
-* States that multiple disciplines contribute to health and disease (Source: wright_2019_3p_disease_model__0010).
-* Was developed, in part, as a response to biological reductionism and plays an integral role in health psychology and behavioral medicine (Source: wright_2019_3p_disease_model__0007).
+## Example 2
 
-**Observation:**  
-Both prompts produced a relevant answer because the retrieved context was sufficient. However, the grounded prompt explicitly cited the source chunk IDs, while the weak prompt did not. This demonstrates that explicit citation instructions improve traceability.
+### Question
 
----
+Why can't I work effectively with chronic pain?
 
-## Example 3 — Fallback behavior
+### Route
 
-**Question:**  
-In health psychology, what are the DSM-5 diagnostic criteria for schizophrenia?
+`psychoeducation`
 
-**Route:**  
-`course_content`
+### Tool called
 
-**Retrieved chunks:**  
-- `wright_2019_3p_disease_model__0008`
-- `ogden_2019_health_psychology__0005`
-- `wright_2019_3p_disease_model__0007`
+- search_knowledge_base: {'query': "Why can't I work effectively with chronic pain?"}
 
-### Weak prompt
+### Observation
 
-Based on the provided context, there is no mention of the DSM-5 diagnostic criteria for schizophrenia.
+- search_knowledge_base: success=True, result_count=3, chunks=['wright_2019_3p_disease_model__0033', 'wright_2019_3p_disease_model__0046', 'wright_2019_3p_disease_model__0037']
 
-### Grounded prompt with fallback
+### State after workflow
 
-I do not have enough information in the provided course materials.
+- user_goal: understand a health psychology topic using scientific evidence
+- selected_route: psychoeducation
+- plan: ['search_knowledge_base', 'build_final_answer']
+- completed_steps: ['classify_request', 'build_plan', 'search_knowledge_base', 'build_final_answer']
+- health_psychology_topics: ['pain']
+- physical_back_pain_request: False
+- spine_condition_detected: False
+- medical_advice_requested: False
+- care_pathway_needed: False
+- fallback_used: True
 
-**Observation:**  
-The retrieved context did not contain the requested DSM-5 diagnostic criteria. The weak prompt avoided inventing an answer in this run, while the grounded prompt followed the explicit fallback rule and returned the predefined missing-information response.
+### Final answer
 
----
+LLM synthesis is temporarily unavailable because the API quota was exceeded. Relevant evidence was successfully retrieved from the knowledge base.
 
-## Example 4 — Course structure route
 
-**Question:**  
-What topics are covered in the Health Psychology course?
+## Example 3
 
-**Route:**  
-`course_structure`
+### Question
 
-**Tools called:**  
-- `retrieve_course_structure`
-- `gemini_generate_content`
+My back hurts, and when I go to the gym to strengthen my back, the pain gets even worse. What should I do?
 
-**Retrieved chunks:**  
-- `health_psychology_course_syllabus__0000`
-- `health_psychology_course_syllabus__0006`
-- `health_psychology_course_syllabus__0003`
+### Route
 
-**Observation:**  
-The router selected the `course_structure` workflow. The retrieval tool returned syllabus-only chunks, demonstrating a separate retrieval strategy for course navigation.
+`back_pain_medical_request`
 
-**Final answer:**  
-Based on the provided course materials, the course covers:
+### Tool called
 
-* The dynamic interaction between biological, social, and psychological factors that influence physical health and illness, with the goal of promoting overall well-being and preventing diseases (Source: `health_psychology_course_syllabus__0000`).
-* Theoretical frameworks and concepts that form the foundation of a psychological perspective on physical health (Source: `health_psychology_course_syllabus__0003`).
+- search_knowledge_base: {'query': 'My back hurts, and when I go to the gym to strengthen my back, the pain gets even worse. What should I do? psychological behavioral aspects of pain pain perception health psychology'}
+- get_ivr_care_options: {}
 
----
+### Observation
 
-## Example 5 — Clarification route
+- search_knowledge_base: success=True, result_count=3, chunks=['ogden_2019_health_psychology__0164', 'ogden_2019_health_psychology__0163', 'ogden_2019_health_psychology__0165']
+- apply_medical_boundary: {'diagnosis_allowed': False, 'treatment_recommendations_allowed': False, 'medical_referral_required': True, 'psychoeducation_allowed': True}
+- get_ivr_care_options: success=True, provider=Institute of Vertebrology and Rehabilitation, cities=['Kyiv', 'Lviv', 'Ivano-Frankivsk'], online_consultation=True
 
-**Question:**  
-Tell me something interesting.
+### State after workflow
 
-**Route:**  
+- user_goal: understand a physical back-pain problem and what to do next
+- selected_route: back_pain_medical_request
+- plan: ['search_knowledge_base', 'apply_medical_boundary', 'get_ivr_care_options', 'add_biopsychosocial_context', 'build_final_answer']
+- completed_steps: ['classify_request', 'build_plan', 'search_knowledge_base', 'apply_medical_boundary', 'get_ivr_care_options', 'add_biopsychosocial_context', 'build_final_answer']
+- health_psychology_topics: ['pain']
+- physical_back_pain_request: True
+- spine_condition_detected: False
+- medical_advice_requested: True
+- care_pathway_needed: True
+- fallback_used: True
+
+### Final answer
+
+I cannot diagnose the cause of your back pain or recommend medication or treatment based on this message. It would be appropriate to discuss your symptoms with a healthcare professional.
+
+You can consult specialists at the Institute of Vertebrology and Rehabilitation. IVR provides care in Kyiv, Lviv, Ivano-Frankivsk, and online consultations are also available. https://ivr.ua/
+
+LLM synthesis is temporarily unavailable because the API quota was exceeded. Relevant evidence was successfully retrieved from the knowledge base.
+
+
+## Example 4
+
+### Question
+
+I have terrible lower back pain. Which painkillers should I use?
+
+### Route
+
+`back_pain_medical_request`
+
+### Tool called
+
+- search_knowledge_base: {'query': 'I have terrible lower back pain. Which painkillers should I use? psychological behavioral aspects of pain pain perception health psychology'}
+- get_ivr_care_options: {}
+
+### Observation
+
+- search_knowledge_base: success=True, result_count=3, chunks=['ogden_2019_health_psychology__0151', 'ogden_2019_health_psychology__0165', 'ogden_2019_health_psychology__0166']
+- apply_medical_boundary: {'diagnosis_allowed': False, 'treatment_recommendations_allowed': False, 'medical_referral_required': True, 'psychoeducation_allowed': True}
+- get_ivr_care_options: success=True, provider=Institute of Vertebrology and Rehabilitation, cities=['Kyiv', 'Lviv', 'Ivano-Frankivsk'], online_consultation=True
+
+### State after workflow
+
+- user_goal: understand a physical back-pain problem and what to do next
+- selected_route: back_pain_medical_request
+- plan: ['search_knowledge_base', 'apply_medical_boundary', 'get_ivr_care_options', 'add_biopsychosocial_context', 'build_final_answer']
+- completed_steps: ['classify_request', 'build_plan', 'search_knowledge_base', 'apply_medical_boundary', 'get_ivr_care_options', 'add_biopsychosocial_context', 'build_final_answer']
+- health_psychology_topics: ['pain']
+- physical_back_pain_request: True
+- spine_condition_detected: False
+- medical_advice_requested: True
+- care_pathway_needed: True
+- fallback_used: True
+
+### Final answer
+
+I cannot diagnose the cause of your back pain or recommend medication or treatment based on this message. It would be appropriate to discuss your symptoms with a healthcare professional.
+
+You can consult specialists at the Institute of Vertebrology and Rehabilitation. IVR provides care in Kyiv, Lviv, Ivano-Frankivsk, and online consultations are also available. https://ivr.ua/
+
+LLM synthesis is temporarily unavailable because the API quota was exceeded. Relevant evidence was successfully retrieved from the knowledge base.
+
+
+## Example 5
+
+### Question
+
+I feel tired and annoyed lately and I don't know why.
+
+### Route
+
 `clarification`
 
-**Tools called:**  
+### Tool called
+
 None
 
-**Observation:**  
-The question could not be mapped to the supported Health Psychology workflows.
+### Observation
 
-**Final answer:**  
-Could you clarify your question? I can help with Health Psychology course content or course structure.
+None
 
+### State after workflow
 
----
+- user_goal: clarify the user's request
+- selected_route: clarification
+- plan: ['build_clarification_answer']
+- completed_steps: ['classify_request', 'build_plan', 'build_clarification_answer']
+- health_psychology_topics: []
+- physical_back_pain_request: False
+- spine_condition_detected: False
+- medical_advice_requested: False
+- care_pathway_needed: False
+- fallback_used: False
 
-# State After Step Summaries
+### Final answer
 
-## Example 1 — Supported course-content question
-
-```json
-{
-  "user_goal": "What is the biopsychosocial model of health?",
-  "selected_route": "course_content",
-  "tool_calls": [
-    "retrieve_course_content",
-    "gemini_generate_content"
-  ],
-  "final_answer_status": "generated"
-}
-```
-
-## Example 2 — Weak vs grounded prompt
-
-```json
-{
-  "user_goal": "What is the biopsychosocial model of health?",
-  "selected_route": "course_content",
-  "tool_calls": [
-    "retrieve_course_content",
-    "gemini_generate_content"
-  ],
-  "final_answer_status": "generated"
-}
-```
-
-## Example 3 — Fallback behavior
-
-```json
-{
-  "user_goal": "In health psychology, what are the DSM-5 diagnostic criteria for schizophrenia?",
-  "selected_route": "course_content",
-  "tool_calls": [
-    "retrieve_course_content",
-    "gemini_generate_content"
-  ],
-  "final_answer_status": "generated"
-}
-```
-
-## Example 4 — Course structure route
-
-```json
-{
-  "user_goal": "What topics are covered in the Health Psychology course?",
-  "selected_route": "course_structure",
-  "tool_calls": [
-    "retrieve_course_structure",
-    "gemini_generate_content"
-  ],
-  "final_answer_status": "generated"
-}
-```
-
-## Example 5 — Clarification route
-
-```json
-{
-  "user_goal": "Tell me something interesting.",
-  "selected_route": "clarification",
-  "tool_calls": [],
-  "final_answer_status": "generated"
-}
-```
+Could you clarify what you would like to understand? You can ask about health psychology, chronic pain, emotional responses to illness, or a back-pain concern.
