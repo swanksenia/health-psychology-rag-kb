@@ -1,0 +1,866 @@
+## Homework 6 — Controlled Agentic Workflow
+
+### Goal
+
+Extend the Health Psychology RAG project with a controlled agentic workflow for an **IVR-oriented Health Psychology and Chronic Back Pain Assistant**.
+
+The workflow should:
+
+- provide evidence-based psychoeducation using the existing scientific knowledge base;
+- identify different types of user requests and select an appropriate route;
+- create and execute a simple multi-step plan;
+- call retrieval and referral tools when required;
+- maintain shared state across workflow steps;
+- apply a deterministic medical safety boundary;
+- support a user journey from psychoeducation to professional IVR consultation when physical back-pain assessment may be needed;
+- keep diagnosis and treatment decisions outside the assistant;
+- generate a final answer grounded in retrieved evidence.
+
+The general agentic pattern is:
+
+```text
+user goal
+→ route / plan
+→ action
+→ observation
+→ state update
+→ next step
+→ final answer
+```
+
+---
+
+### Product use case
+
+This workflow is designed as a demo assistant for the **Institute of Vertebrology and Rehabilitation (IVR)**.
+
+The product idea is to use evidence-based Health Psychology psychoeducation as an educational entry point for users who may be experiencing chronic pain, back pain, or spine-related problems.
+
+The assistant can first help the user understand relevant psychological and behavioral aspects of health and pain.
+
+When the conversation indicates a physical back-pain problem or a request for diagnosis, medication, exercises, or treatment, the assistant does not attempt to provide clinical care itself.
+
+Instead, it moves the user toward an appropriate professional-care pathway.
+
+The intended product funnel is:
+
+```text
+user concern
+→ useful evidence-based psychoeducation
+→ better understanding of the problem
+→ identification of a possible need for professional assessment
+→ IVR consultation pathway
+```
+
+For back-pain and spine-related medical requests, the workflow follows:
+
+```text
+physical back-pain request
+→ retrieve relevant pain-psychology evidence
+→ apply medical safety boundary
+→ provide IVR consultation options
+→ add short evidence-based psychoeducation
+→ direct the user to professional care
+```
+
+The assistant therefore has two different responsibilities:
+
+```text
+Health Psychology questions
+→ evidence-based psychoeducation
+
+Physical back-pain / treatment questions
+→ professional IVR referral
+  + limited psychological pain psychoeducation
+```
+
+The assistant does **not** diagnose physical conditions and does **not** recommend medication, exercises, or medical treatment.
+
+Users who require clinical assessment are directed to IVR specialists, including neurologists and other relevant healthcare professionals.
+
+The current IVR configuration includes:
+
+- Kyiv;
+- Lviv;
+- Ivano-Frankivsk;
+- online consultation.
+
+Website:
+
+```text
+https://ivr.ua/
+```
+
+IVR referral information is treated as a separate product configuration and is **not** used as scientific evidence in the Health Psychology RAG knowledge base.
+
+---
+
+### Agentic workflow
+
+```text
+User Request
+    ↓
+create_initial_state()
+    ↓
+classify_request()
+    ↓
+State update:
+- user_goal
+- selected_route
+- request flags
+    ↓
+build_plan()
+    ↓
+    ├─────────────────────────────────────────────┐
+    │                                             │
+    │ psychoeducation                             │
+    │                                             │
+    │ search_knowledge_base                       │
+    │        ↓                                    │
+    │ Tool observation                            │
+    │        ↓                                    │
+    │ State update                                │
+    │        ↓                                    │
+    │ Gemini evidence synthesis                   │
+    │        ↓                                    │
+    │ Final answer                                │
+    │                                             │
+    ├─────────────────────────────────────────────┤
+    │                                             │
+    │ back_pain_medical_request                   │
+    │                                             │
+    │ search_knowledge_base                       │
+    │        ↓                                    │
+    │ Tool observation                            │
+    │        ↓                                    │
+    │ apply_medical_boundary                      │
+    │        ↓                                    │
+    │ State update                                │
+    │        ↓                                    │
+    │ get_ivr_care_options                        │
+    │        ↓                                    │
+    │ Tool observation                            │
+    │        ↓                                    │
+    │ add_biopsychosocial_context                 │
+    │        ↓                                    │
+    │ Gemini synthesis of retrieved evidence      │
+    │        ↓                                    │
+    │ IVR referral + psychoeducation              │
+    │        ↓                                    │
+    │ Final answer                                │
+    │                                             │
+    └─────────────────────────────────────────────┤
+                                                  │
+      clarification                               │
+            ↓                                     │
+      build_clarification_answer                  │
+            ↓                                     │
+      Final answer                                │
+                                                  │
+    ──────────────────────────────────────────────┘
+```
+
+The workflow is controlled by Python logic rather than by an autonomous LLM planner.
+
+The LLM does not decide which route or tool should be used.
+
+---
+
+### Routes
+
+The workflow currently supports three routes.
+
+#### 1. `psychoeducation`
+
+This route handles Health Psychology questions that can be answered using the scientific knowledge base.
+
+Example:
+
+```text
+How to change harmful behavior?
+```
+
+Execution:
+
+```text
+user question
+→ search_knowledge_base
+→ retrieved scientific chunks
+→ Gemini synthesis
+→ grounded final answer
+```
+
+The original user question is used as the retrieval query.
+
+The workflow does not force every Health Psychology request into a predefined theory or model.
+
+This allows retrieval to determine whether the most relevant source concerns:
+
+- behavior change;
+- COM-B;
+- learning;
+- reinforcement;
+- pain psychology;
+- illness behavior;
+- another concept available in the knowledge base.
+
+---
+
+#### 2. `back_pain_medical_request`
+
+This route handles requests that contain physical back pain, spine-related symptoms, or requests for medical advice.
+
+Example:
+
+```text
+I have terrible lower back pain.
+Which painkillers should I use?
+```
+
+Another example:
+
+```text
+My back hurts, and when I go to the gym to strengthen my back,
+the pain gets even worse. What should I do?
+```
+
+Execution:
+
+```text
+user request
+→ retrieve psychological / behavioral pain evidence
+→ apply medical safety boundary
+→ get IVR care options
+→ add biopsychosocial context
+→ synthesize retrieved evidence
+→ professional-care referral
+→ final answer
+```
+
+For this route:
+
+```text
+diagnosis
+→ not provided
+
+medication recommendations
+→ not provided
+
+exercise recommendations
+→ not provided
+
+physical treatment recommendations
+→ not provided
+
+professional referral
+→ provided
+
+Health Psychology psychoeducation
+→ provided from retrieved evidence
+```
+
+---
+
+#### 3. `clarification`
+
+This route is used when the workflow cannot reliably determine the user's goal from the available information.
+
+Example:
+
+```text
+I feel tired and annoyed lately and I don't know why.
+```
+
+Execution:
+
+```text
+unclear request
+→ no retrieval tool call
+→ clarification response
+```
+
+This prevents the system from forcing an ambiguous request into an unsupported Health Psychology or medical workflow.
+
+---
+
+### Planning
+
+After routing, `build_plan()` creates an explicit ordered sequence of steps.
+
+For example, the `psychoeducation` route creates:
+
+```python
+[
+    "search_knowledge_base",
+    "build_final_answer"
+]
+```
+
+The `back_pain_medical_request` route creates:
+
+```python
+[
+    "search_knowledge_base",
+    "apply_medical_boundary",
+    "get_ivr_care_options",
+    "add_biopsychosocial_context",
+    "build_final_answer"
+]
+```
+
+The `clarification` route creates:
+
+```python
+[
+    "build_clarification_answer"
+]
+```
+
+The plan is therefore explicit and inspectable before execution.
+
+---
+
+### Tools
+
+The workflow uses two main read-only tools.
+
+#### `search_knowledge_base(query)`
+
+This tool reuses the improved retrieval pipeline implemented in Homework 3.
+
+It searches the Health Psychology knowledge base using:
+
+- SentenceTransformer embeddings;
+- FAISS vector search;
+- source metadata.
+
+The tool returns a structured observation containing:
+
+```text
+success
+query
+retrieved chunks
+similarity scores
+chunk IDs
+document metadata
+```
+
+The knowledge base remains the source of evidence for Health Psychology explanations.
+
+---
+
+#### `get_ivr_care_options()`
+
+This tool provides structured IVR referral information.
+
+The current configuration contains:
+
+```text
+Provider:
+Institute of Vertebrology and Rehabilitation
+
+Locations:
+- Kyiv
+- Lviv
+- Ivano-Frankivsk
+
+Online consultation:
+available
+```
+
+Configured care categories include:
+
+```text
+doctor consultations
+therapeutic massage
+physical therapy and physiotherapy
+rehabilitation
+manual and other medical procedures
+injection therapy
+diagnostics
+orthopedic corrective devices
+```
+
+The tool is called only when the selected workflow requires a professional-care pathway.
+
+Unlike scientific retrieval, this tool represents product/business configuration rather than evidence from the Health Psychology knowledge base.
+
+---
+
+### Shared state
+
+The agent maintains a shared state object throughout execution.
+
+The state includes:
+
+```python
+{
+    "user_message": ...,
+    "user_goal": ...,
+
+    "selected_route": ...,
+    "plan": ...,
+    "current_step": ...,
+    "completed_steps": ...,
+
+    "health_psychology_topics": ...,
+
+    "physical_back_pain_request": ...,
+    "spine_condition_detected": ...,
+    "medical_advice_requested": ...,
+
+    "care_pathway_needed": ...,
+    "care_mode": ...,
+
+    "tool_calls": ...,
+    "observations": ...,
+
+    "intermediate_results": ...,
+
+    "fallback_used": ...,
+
+    "final_answer": ...
+}
+```
+
+The state provides a trace of:
+
+```text
+what the user wanted
+→ which route was selected
+→ which plan was created
+→ which tools were called
+→ what the tools returned
+→ which steps were completed
+→ what final answer was produced
+```
+
+This makes the workflow easier to inspect and debug than a single opaque LLM call.
+
+---
+
+### Route-aware retrieval
+
+Retrieval behavior depends on the selected route.
+
+For general psychoeducation, the original user question is used directly.
+
+Example:
+
+```text
+How to change harmful behavior?
+```
+
+is retrieved as a behavior-change question without automatically adding chronic-pain terminology.
+
+For physical back-pain requests, the workflow builds a retrieval query containing additional Health Psychology context:
+
+```text
+psychological behavioral aspects of pain
+pain perception
+health psychology
+```
+
+This separates two different tasks:
+
+```text
+medical part of the request
+→ deterministic safety + referral logic
+
+psychological part of the request
+→ scientific RAG retrieval
+```
+
+The knowledge base is therefore used to explain psychological and behavioral aspects of pain rather than to generate medical treatment advice.
+
+---
+
+### Medical safety boundary
+
+For physical back-pain requests, a deterministic safety step is executed before the final answer.
+
+The workflow stores:
+
+```python
+{
+    "diagnosis_allowed": False,
+    "treatment_recommendations_allowed": False,
+    "medical_referral_required": True,
+    "psychoeducation_allowed": True
+}
+```
+
+The final response therefore separates medical and psychoeducational responsibilities.
+
+```text
+Physical / clinical problem
+→ healthcare professional
+
+Psychological and behavioral context
+→ scientific knowledge base
+```
+
+The medical boundary is implemented as workflow logic rather than delegated to the LLM.
+
+---
+
+### Role of the LLM
+
+Gemini is used only as the **final synthesis layer**.
+
+It does not control the agent workflow.
+
+Gemini does not:
+
+- select the route;
+- create the execution plan;
+- decide which tools should be called;
+- perform vector retrieval;
+- decide whether medical advice is allowed;
+- determine whether IVR should be queried.
+
+These decisions are handled deterministically by the workflow.
+
+The LLM receives the retrieved chunks only after retrieval has been completed.
+
+Its task is to:
+
+- summarize relevant retrieved evidence;
+- combine relevant statements when necessary;
+- make the response concise and readable;
+- preserve the meaning of the retrieved sources;
+- remove broken links or incomplete text fragments.
+
+The synthesis prompt explicitly requires the model to:
+
+```text
+use only retrieved evidence
+do not use external knowledge
+do not add new facts
+do not add unsupported interpretations
+do not add recommendations not present in the workflow
+```
+
+For the `back_pain_medical_request` route, Gemini receives an additional restriction.
+
+It may synthesize only evidence concerning:
+
+- psychological aspects of pain;
+- emotional aspects of pain;
+- cognitive aspects of pain;
+- learning processes;
+- behavioral aspects of pain perception.
+
+It must not generate:
+
+- medication advice;
+- exercises;
+- physical treatment recommendations;
+- pain-management techniques;
+- medical interventions.
+
+The clinical part of the response remains under deterministic workflow control.
+
+---
+
+### LLM fallback
+
+The workflow also includes basic resilience for Gemini API failures.
+
+If the generation API returns a quota error, the workflow sets:
+
+```python
+fallback_used = True
+```
+
+and returns a deterministic fallback response indicating that LLM synthesis is temporarily unavailable.
+
+The important point is that the entire agent workflow does not fail.
+
+The following steps may still complete successfully:
+
+```text
+routing
+planning
+retrieval
+tool calls
+observations
+state updates
+medical boundary
+IVR referral
+```
+
+Only the optional natural-language synthesis layer becomes unavailable.
+
+---
+
+### Example execution trace
+
+A simplified back-pain workflow looks like:
+
+```text
+Question:
+"I have terrible lower back pain.
+Which painkillers should I use?"
+
+↓
+Route:
+back_pain_medical_request
+
+↓
+Plan:
+search_knowledge_base
+apply_medical_boundary
+get_ivr_care_options
+add_biopsychosocial_context
+build_final_answer
+
+↓
+Tool:
+search_knowledge_base
+
+↓
+Observation:
+relevant Health Psychology pain chunks retrieved
+
+↓
+State update:
+knowledge_search stored in intermediate_results
+
+↓
+Medical boundary:
+diagnosis_allowed = False
+treatment_recommendations_allowed = False
+medical_referral_required = True
+
+↓
+Tool:
+get_ivr_care_options
+
+↓
+Observation:
+IVR locations and online consultation returned
+
+↓
+State update:
+IVR information stored
+
+↓
+Gemini:
+synthesizes only psychological aspects of retrieved pain evidence
+
+↓
+Final answer:
+medical boundary
++ IVR professional referral
++ short evidence-based pain psychoeducation
+```
+
+---
+
+### Test scenarios
+
+The workflow was tested with five representative user requests.
+
+#### Test 1 — Behavior change
+
+```text
+How to change harmful behavior?
+```
+
+Expected route:
+
+```text
+psychoeducation
+```
+
+---
+
+#### Test 2 — Chronic pain and functioning
+
+```text
+Why can't I work effectively with chronic pain?
+```
+
+Expected route:
+
+```text
+psychoeducation
+```
+
+---
+
+#### Test 3 — Back pain and exercise
+
+```text
+My back hurts, and when I go to the gym to strengthen my back,
+the pain gets even worse. What should I do?
+```
+
+Expected route:
+
+```text
+back_pain_medical_request
+```
+
+---
+
+#### Test 4 — Back pain and medication
+
+```text
+I have terrible lower back pain.
+Which painkillers should I use?
+```
+
+Expected route:
+
+```text
+back_pain_medical_request
+```
+
+---
+
+#### Test 5 — Ambiguous request
+
+```text
+I feel tired and annoyed lately and I don't know why.
+```
+
+Expected route:
+
+```text
+clarification
+```
+
+The tests record:
+
+- user question;
+- selected route;
+- execution plan;
+- tool calls;
+- tool observations;
+- completed workflow steps;
+- important state values;
+- final answer;
+- fallback status.
+
+Detailed execution traces are available in:
+
+```text
+outputs/agent_flow_examples.md
+```
+
+---
+
+### Files
+
+Homework 6 adds the following main artifacts:
+
+```text
+data/notebooks/HW6_Agentic_Workflow.ipynb
+scripts/agent_flow.py
+outputs/agent_flow_examples.md
+```
+
+The notebook contains the complete development and testing process:
+
+```text
+data/notebooks/HW6_Agentic_Workflow.ipynb
+```
+
+The clean executable workflow is available in:
+
+```text
+scripts/agent_flow.py
+```
+
+Detailed workflow traces are available in:
+
+```text
+outputs/agent_flow_examples.md
+```
+
+---
+
+### Dependencies
+
+The workflow uses:
+
+```text
+faiss-cpu
+sentence-transformers
+google-genai
+```
+
+Gemini access requires the environment variable:
+
+```text
+GEMINI_API_KEY
+```
+
+The API key is not stored in the repository.
+
+---
+
+### Current limitations
+
+The current implementation intentionally remains simple and controlled.
+
+Current limitations include:
+
+- routing is based on deterministic keyword rules;
+- keyword routing may not correctly classify every natural-language formulation;
+- there is no long-term conversational memory;
+- the workflow currently processes one user request at a time;
+- retrieval quality depends on the current Health Psychology knowledge base;
+- IVR information is stored as local structured configuration rather than retrieved from a live IVR API;
+- Gemini synthesis is prompt-constrained, but prompt instructions alone cannot provide a mathematical guarantee that pretrained model knowledge will never influence generation;
+- the medical escalation logic is intentionally simple;
+- the assistant does not replace professional clinical assessment.
+
+Future versions could add:
+
+- semantic or LLM-assisted routing;
+- conversation memory;
+- live IVR API or CRM integration;
+- appointment availability;
+- appointment-booking tools;
+- analytics for funnel conversion;
+- more detailed medical escalation rules;
+- additional retrieval evaluation for chronic-pain queries.
+
+---
+
+### Result
+
+Homework 6 extends the project from a retrieval-oriented RAG pipeline into a controlled multi-step agentic workflow.
+
+The resulting architecture combines:
+
+```text
+routing
++ explicit planning
++ tool use
++ observations
++ shared state
++ deterministic safety rules
++ RAG retrieval
++ constrained LLM synthesis
++ fallback handling
+```
+
+From a product perspective, the workflow demonstrates how a Health Psychology RAG assistant can serve as an educational entry point in the IVR user funnel.
+
+Instead of immediately presenting the user with a commercial or clinical call to action, the assistant first provides useful evidence-based psychoeducation.
+
+When the user's request indicates a physical back-pain problem that may require clinical assessment, the workflow transitions from education to a professional-care pathway:
+
+```text
+user concern
+→ psychoeducation
+→ recognition of possible care need
+→ safe referral
+→ IVR consultation
+```
+
+This keeps scientific psychoeducation, medical safety, and the business referral flow as separate and traceable components of the system.
