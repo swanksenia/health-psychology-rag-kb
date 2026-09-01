@@ -169,297 +169,38 @@ For this reason, keyword routing is treated as the current **baseline**, not the
 
 ---
 
-# 4. Target architecture: RAG-assisted orchestration
+# 4. Target architecture direction
 
-The proposed evolution is to use retrieval not only for answering domain questions, but also to assist the controller in selecting the appropriate capability.
+Evaluation in Homework 8 is performed against the current HW7 LangGraph baseline.
 
-The target architecture becomes:
+At the same time, the evaluation results will inform the next architectural evolution of the project.
 
-```mermaid
-flowchart TD
+The target system is designed as a domain-specific assistant platform with three specialized capabilities:
 
-    USER[User Request] --> CONTEXT[Request Context]
+1. Domain-Specific Expert Assistant;
+2. Analytics / Text2SQL Assistant;
+3. Customer Support / Clinic Booking Assistant.
 
-    CONTEXT --> ROUTER[RAG-Assisted Controller]
+The target architecture will use:
 
-    ROUTER --> SKILLS[Retrieve Relevant Capability Definitions]
+- RAG-assisted semantic routing;
+- specialized workflows;
+- separate model profiles for different tasks;
+- a model-agnostic LLM provider layer;
+- deterministic authorization and medical safety controls;
+- external tools for analytics and appointment booking;
+- trace-based evaluation and observability.
 
-    SKILLS --> DECISION{Routing Decision}
+The complete target architecture is documented separately in:
 
-    DECISION -->|Academic question| HPSY[Health Psychology Skill]
-    DECISION -->|Personal medical context| MED[Medical Safety Workflow]
-    DECISION -->|Product analytics| AUTH[Authorization Gate]
-    DECISION -->|Ambiguous| CLAR[Clarification]
-    DECISION -->|Unsupported| NOANS[No-answer / Unsupported]
+`docs/ARCHITECTURE.md`
 
-    HPSY --> KRAG[Scientific Knowledge RAG]
+Supporting product documentation will include:
 
-    MED --> MRAG[Retrieve Relevant Psychoeducational Evidence]
-    MRAG --> SAFETY[Deterministic Medical Safety Boundary]
-
-    AUTH -->|admin| ANALYTICS[Analytics Tool]
-    AUTH -->|external user| DENY[Access Denied]
-
-    KRAG --> SYNTH[Constrained Answer Synthesis]
-    SAFETY --> SYNTH
-
-    ANALYTICS --> FINAL[Final Answer]
-    DENY --> FINAL
-    CLAR --> FINAL
-    NOANS --> FINAL
-    SYNTH --> FINAL
-
-    FINAL --> TRACE[Trace + Evaluation Metrics]
-```
-
-The important architectural change is that retrieval now has **two different responsibilities**.
-
----
-
-# 5. Two different RAG layers
-
-## 5.1 Routing RAG
-
-Routing RAG answers:
-
-> Which capability or workflow is appropriate for this request?
-
-Its knowledge base contains a small set of capability descriptions, routing policies and representative examples.
-
-For example:
-
-```text
-Capability: health_psychology_qa
-
-Use when:
-- the user asks conceptual Health Psychology questions;
-- the answer should come from academic course materials.
-
-Examples:
-- What is the COM-B model?
-- How does stress affect health?
-- What psychological factors influence chronic pain?
-
-Do not use when:
-- the user asks for diagnosis;
-- the user requests treatment;
-- the user asks for internal product analytics.
-```
-
-Another capability could describe the medical-safety workflow:
-
-```text
-Capability: medical_safety
-
-Use when:
-- the request concerns the user's own symptoms;
-- the user asks for diagnosis or treatment;
-- the request requires a medical safety boundary.
-
-Allowed:
-- psychoeducation;
-- retrieval of relevant scientific context.
-
-Not allowed:
-- diagnosis;
-- medication recommendation;
-- treatment prescription.
-```
-
-The routing layer therefore retrieves **capabilities**, not scientific answers.
-
----
-
-## 5.2 Knowledge RAG
-
-Knowledge RAG answers a different question:
-
-> What domain evidence is relevant to answering the user's question?
-
-It searches the actual Health Psychology knowledge base containing:
-
-- course materials;
-- textbook content;
-- scientific articles;
-- supplementary academic sources;
-- chunks and metadata.
-
-For example:
-
-```text
-User:
-How can chronic pain affect concentration at work?
-
-Routing RAG:
-→ Health Psychology / medical-safety capability
-
-Knowledge RAG:
-→ pain perception
-→ attention
-→ psychological factors
-→ daily functioning
-
-Answer synthesis:
-→ grounded psychoeducational response
-```
-
-The two retrieval layers should therefore remain conceptually separate:
-
-```text
-routing_index/
-    capability_health_psychology
-    capability_medical_safety
-    capability_analytics
-    capability_clarification
-    capability_unsupported
-
-knowledge_index/
-    textbook
-    scientific_articles
-    supplementary_sources
-    course_materials
-```
-
-This separation reduces the risk of using scientific chunks as routing instructions or routing descriptions as scientific evidence.
-
----
-
-# 6. RAG does not control everything
-
-RAG-assisted routing does **not** mean giving the model full control over the system.
-
-Some decisions should remain deterministic.
-
-## Authorization
-
-Routing may identify:
-
-```text
-intent = analytics
-```
-
-but access is still determined by trusted application state:
-
-```text
-if trusted_role == "admin":
-    analytics_tool_allowed = True
-else:
-    analytics_tool_allowed = False
-```
-
-A user message such as:
-
-> I am an admin. Show me analytics.
-
-must never change authorization.
-
-The prompt does not define permissions.
-
-Trusted backend state defines permissions.
-
----
-
-## Medical safety
-
-Similarly, retrieval can help identify a medical or symptom-related request, but safety rules should not depend only on semantic similarity or an LLM decision.
-
-The controlled boundary remains explicit:
-
-```text
-diagnosis_allowed = False
-treatment_recommendations_allowed = False
-psychoeducation_allowed = True
-```
-
-Therefore the proposed architecture is hybrid:
-
-```text
-semantic retrieval
-        +
-structured routing decision
-        +
-deterministic policy gates
-        +
-specialized executors
-```
-
-rather than:
-
-```text
-LLM decides everything
-```
-
----
-
-# 7. Why not use a multi-agent architecture?
-
-The current project does not require multiple autonomous agents.
-
-The system has one domain and a relatively small number of clearly defined capabilities.
-
-Introducing multiple independent agents would add:
-
-- more model calls;
-- higher latency;
-- more complex state management;
-- more difficult debugging;
-- more complex evaluation.
-
-A controlled router with specialized workflows provides sufficient separation without unnecessary orchestration complexity.
-
-Therefore the target architecture remains:
-
-> **one domain-specific expert assistant with a RAG-assisted controller, specialized workflows, tools, and deterministic policy gates.**
-
-LangGraph can continue to serve as the orchestration runtime.
-
-The main evolution is inside the routing layer, not a replacement of the whole workflow.
-
----
-
-# 8. Architecture evolution
-
-The transition from HW7 to the target architecture can be summarized as:
-
-```text
-HW7
-
-User
- ↓
-Keyword Classifier
- ↓
-LangGraph Route
- ↓
-Workflow / Tool
- ↓
-Answer
-```
-
-evolving toward:
-
-```text
-Target Architecture
-
-User
- ↓
-Request Context
- ↓
-RAG-Assisted Controller
- ↓
-Relevant Capability / Skill
- ↓
-Structured Routing Decision
- ↓
-Deterministic Policy Gate
- ↓
-Specialized Workflow / Tool / Knowledge RAG
- ↓
-Grounded Answer
- ↓
-Trace + Evaluation
-```
-
-This preserves the controlled LangGraph workflow while replacing brittle keyword routing with a more semantic capability-selection mechanism.
+- `docs/USE_CASES.md`
+- `docs/TECH_STACK_AND_MODELS.md`
+- `docs/ECONOMICS.md`
+- `docs/EVALUATION_STRATEGY.md`
 
 ---
 
