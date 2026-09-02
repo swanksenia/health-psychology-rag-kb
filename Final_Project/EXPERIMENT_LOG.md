@@ -1,688 +1,429 @@
 # Experiment Log
 
-## Purpose
-
-Experiment and decision log for the Final Project.
-
-Tracks:
-- test runs;
-- measured results;
-- failures;
-- architecture decisions;
-- next steps.
+Short record of experiments, results and architecture decisions for the Final Project.
 
 ---
 
-# Experiment 001 — Ukrainian Routing Baseline
+## Results Summary
 
-**Date:** 2026-09-02  
+| Experiment | Result | Key finding |
+|---|---:|---|
+| Baseline — English keywords | 7.7% accuracy | Does not work for Ukrainian traffic |
+| A — Ukrainian rules | 84.6% accuracy | Best overall accuracy and latency |
+| B — Translate then route | INVALID | API/model errors; rerun required |
+| C — Multilingual embeddings | 69.2% accuracy | Better safety recall, higher latency |
+| Taxonomy v2 + RAG + Claude | Working end-to-end | Capability + policy separation works |
+| Taxonomy v2 evaluation | Completed | 100% preferred/allowed capability accuracy, 100% safety recall, 0% unsafe routes |
+| Retrieval runtime caching | Warm retrieval 5456.57 ms → 459.48 ms | Observability exposed repeated model/index loading; caching reduced warm retrieval latency ~11.9× |
+
+---
+
+## Experiment 001 — English Keyword Baseline
+
 **Status:** Completed
 
-## Question
-
-How well does the existing HW7-style English keyword router work for Ukrainian user requests?
-
-## Hypothesis
-
-The existing router is expected to perform poorly because it relies on predefined English keywords while the target IVR user may write naturally in Ukrainian.
-
-## Dataset
-
-Current evaluation set:
-
 ```text
-13 total cases
-6 controlled cases
-7 anonymized real-user-derived cases
-6 expected medical-safety cases
+Routing accuracy:       7.7%
+Real-user accuracy:     0.0%
+Medical-safety recall:  0.0%
 ```
 
-Main routes:
+**Finding:** HW7 English keyword routing is not suitable for Ukrainian requests.
 
-```text
-health_psychology
-back_pain_medical_request
-analytics
-clarification
-```
-
-## Baseline
-
-```text
-BASELINE_HW7_english_keywords
-```
-
-## Measured result
-
-```text
-Routing accuracy:        1 / 13 = 7.7%
-Real-user accuracy:      0 / 7  = 0.0%
-Medical-safety recall:   0 / 6  = 0.0%
-Average routing latency: ~0.03 ms
-Paid routing API cost:   $0
-```
-
-## Interpretation
-
-The baseline is computationally cheap, but it is not usable for Ukrainian production traffic.
-
-The main failure is not RAG quality. The request is often sent to the wrong route before the downstream RAG/workflow is executed.
-
-## Decision
-
-Use the HW7 English-keyword router only as the **before/baseline** reference.
+**Decision:** Keep as the `before` baseline.
 
 ---
 
-# Experiment 002 — Strategy A: Native Ukrainian Rules
+## Experiment 002 — Ukrainian Rules
 
-**Date:** 2026-09-02  
 **Status:** Completed
 
-## Change
-
-Added:
-
 ```text
-Ukrainian deterministic routing rules
-+
-shared deterministic medical-safety pre-gate
+Routing accuracy:       84.6%
+Real-user accuracy:     71.4%
+Medical-safety recall:  66.7%
+Latency:                ~0.07 ms
+Paid API cost:          $0
 ```
 
-No paid model call is required for routing.
+**Finding:** Best overall accuracy and latency, but medical-safety recall is still insufficient.
 
-## Hypothesis
-
-Native Ukrainian rules should provide a large improvement over the English-keyword baseline at almost zero incremental API cost.
-
-## Measured result
-
-```text
-Routing accuracy:        11 / 13 = 84.6%
-Real-user accuracy:       5 / 7  = 71.4%
-Medical-safety recall:    4 / 6  = 66.7%
-Average routing latency: ~0.07 ms
-Input tokens:             0
-Output tokens:            0
-Paid routing API cost:    $0
-```
-
-## Improvement vs baseline
-
-```text
-Overall accuracy:
-7.7% → 84.6%
-
-Real-user accuracy:
-0.0% → 71.4%
-
-Medical-safety recall:
-0.0% → 66.7%
-```
-
-## Remaining failures
-
-### R06
-
-User request:
-
-```text
-Сьогодні. Прокинулася, наче не боліло. Попрацювала, але одразу повернувся біль від сидіння...
-```
-
-Expected:
-
-```text
-back_pain_medical_request
-```
-
-Actual:
-
-```text
-health_psychology
-```
-
-Interpretation:
-
-A long natural-language personal pain narrative is more difficult to classify reliably using simple lexical rules.
-
-### R10
-
-User request describes a proposed rehabilitation / stretching / exercise progression.
-
-Expected:
-
-```text
-back_pain_medical_request
-```
-
-Actual:
-
-```text
-clarification
-```
-
-Interpretation:
-
-The medical intent is implicit and distributed across a long colloquial request rather than expressed through one simple keyword.
-
-## Decision
-
-Strategy A is currently the strongest **overall accuracy / latency / API-cost** baseline.
-
-However, it does not yet meet a strong enough medical-safety recall target for production use.
-
-Do not declare Strategy A the production winner yet.
+**Decision:** Strong baseline, not yet production-ready.
 
 ---
 
-# Experiment 003 — Strategy B: Translate Then Route
+## Experiment 003 — Translate Then Route
 
-**Date:** 2026-09-02  
-**Status:** Invalid run — rerun required
+**Status:** Invalid — rerun required
 
-## Intended strategy
+Translation API/model failures made the run invalid.
 
-```text
-Ukrainian request
-→ Gemini translation to English
-→ English deterministic router
-```
+The evaluator also allowed a failed call to count as correct when fallback happened to match `clarification`.
 
-The shared deterministic medical-safety pre-gate runs before translation for obvious safety-sensitive requests.
-
-## Hypothesis
-
-Translation may normalize Ukrainian phrasing and allow reuse of an English routing layer, but it adds:
-
-- an additional model call;
-- tokens;
-- API cost;
-- latency;
-- an additional failure point.
-
-## Observed run
-
-Reported benchmark values:
-
-```text
-Routing accuracy:        38.5%
-Real-user accuracy:      57.1%
-Medical-safety recall:   66.7%
-Average latency:         ~324 ms
-Input tokens:            0
-Output tokens:           0
-API cost:                $0
-Errors:                  9
-```
-
-## Why this run is invalid
-
-Nine translation calls returned:
-
-```text
-ClientError: 404 NOT_FOUND
-```
-
-Therefore the translation strategy did not execute successfully for most applicable cases.
-
-The reported `38.5%` must **not** be interpreted as Strategy B routing accuracy.
-
-A second evaluation issue was also identified:
-
-```text
-failed API call
-→ fallback route = clarification
-→ expected route may also equal clarification
-→ evaluator could count the failed run as correct
-```
-
-This means execution success must be part of correctness.
-
-## Fix required
-
-Correctness should be:
-
-```python
-correct = (
-    result.error is None
-    and result.route == expected_route
-)
-```
-
-## Decision
-
-Do not compare Strategy B against A or C until:
-
-```text
-errors = 0
-input_tokens > 0
-output_tokens > 0
-translation API cost > 0
-```
-
-**Next action:** rerun with an available translation model and corrected evaluator.
+**Decision:** Do not compare Strategy B until execution errors are fixed.
 
 ---
 
-# Experiment 004 — Strategy C: Multilingual Semantic Embeddings
+## Experiment 004 — Multilingual Semantic Router
 
-**Date:** 2026-09-02  
-**Status:** Completed — needs tuning
-
-## Strategy
+**Status:** Completed
 
 ```text
-Ukrainian query
-→ multilingual embedding
-→ capability similarity
-→ structured route
+Routing accuracy:       69.2%
+Real-user accuracy:     71.4%
+Medical-safety recall:  83.3%
+Latency:                ~32 ms
 ```
 
-Model:
+**Finding:** Semantic routing improves safety recall but is slower and less accurate overall than Ukrainian rules.
 
-```text
-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-```
-
-The deterministic medical-safety pre-gate remains outside the semantic router.
-
-## Hypothesis
-
-Semantic routing should handle Ukrainian paraphrases better than keyword rules, but will require more compute and threshold calibration.
-
-## Measured result
-
-```text
-Routing accuracy:        9 / 13 = 69.2%
-Real-user accuracy:      5 / 7  = 71.4%
-Medical-safety recall:   5 / 6  = 83.3%
-Average routing latency: ~32.3 ms
-Paid API cost:           $0
-```
-
-Important:
-
-```text
-$0 API inference cost ≠ zero production cost
-```
-
-The local embedding model still consumes CPU/GPU resources and has a large model-download/runtime footprint.
-
-## Comparison with Strategy A
-
-```text
-                         A Rules       C Semantic
-Overall accuracy         84.6%         69.2%
-Real-user accuracy       71.4%         71.4%
-Medical-safety recall    66.7%         83.3%
-Latency                  ~0.07 ms      ~32.3 ms
-Paid API cost            $0            $0*
-```
-
-`*` Local infrastructure cost is not included.
-
-## Important failures
-
-### C02
-
-```text
-Що таке біопсихосоціальна модель здоров'я?
-```
-
-Expected:
-
-```text
-health_psychology
-```
-
-Actual:
-
-```text
-back_pain_medical_request
-```
-
-Confidence:
-
-```text
-0.526610
-```
-
-Interpretation:
-
-Semantic similarity alone can over-associate domain concepts with the medical-safety capability.
-
-### C06
-
-```text
-Чому я уникаю руху, коли боюся, що він посилить біль?
-```
-
-Expected:
-
-```text
-health_psychology
-```
-
-Actual:
-
-```text
-back_pain_medical_request
-```
-
-Interpretation:
-
-The semantic router interprets first-person pain language as medical intent even when the request is conceptual Health Psychology.
-
-### R02
-
-```text
-Ергономічний стул
-```
-
-Expected:
-
-```text
-health_psychology
-```
-
-Actual:
-
-```text
-clarification
-```
-
-Confidence:
-
-```text
-0.168637
-```
-
-Interpretation:
-
-The capability descriptions / similarity threshold do not yet give sufficient semantic coverage for short ergonomics queries.
-
-### R06
-
-Long personal pain/work narrative.
-
-Expected:
-
-```text
-back_pain_medical_request
-```
-
-Actual:
-
-```text
-clarification
-```
-
-Confidence:
-
-```text
-0.233250
-```
-
-Interpretation:
-
-A generic capability embedding is not automatically sufficient for complex real-user narratives.
-
-## Decision
-
-Strategy C is **not automatically better because it is semantic**.
-
-It currently improves medical-safety recall but loses overall routing accuracy and adds significant latency/compute compared with Strategy A.
-
-Threshold and capability representations require calibration.
+**Decision:** Semantic does not automatically mean better.
 
 ---
 
-# Experiment 005 — Conversation & Funnel Observability
+## Experiment 005 — Conversation & Funnel Observability
 
-**Date:** 2026-09-02  
-**Status:** Implemented, production data not yet available
+**Status:** Implemented
 
-## Goal
-
-Connect routing and AI cost to the eventual IVR business funnel.
-
-## Added conversation state
-
-The system can track:
+Tracked:
 
 ```text
-turn_count
-domain_turn_count
-unique_topic_count
-risk_level
-medical_safety_triggered
-professional_care_required
-location_permission
-confirmed_city
-IVR CTA state
+turns
+domain engagement
+risk
 LLM calls
-input tokens
-output tokens
-estimated AI cost
+tokens
+AI cost
+IVR CTA
+website click
+booking
 ```
 
-## Funnel events
+Demo policy:
 
 ```text
-conversation_started
-→ domain_engaged
-→ soft_cta_eligible
-→ ivr_cta_shown
-→ ivr_cta_accepted
-→ clinic_discussion_started
-→ ivr_link_clicked
-→ booking_started
-→ booking_completed
+high risk
+→ professional-care pathway immediately
+
+low/moderate risk
+→ useful conversation
+→ soft IVR CTA later
 ```
 
-## CTA policy
-
-Low / moderate risk:
+Future KPI:
 
 ```text
-turn 1–5
-→ useful evidence-grounded conversation
-
-turn >= 6
-AND sufficient domain engagement
-→ soft IVR CTA eligible
+AI cost per booked consultation
 ```
 
-High risk:
-
-```text
-professional-care pathway immediately
-```
-
-Safety is not delayed for conversion optimization.
-
-## Future business metrics
-
-Once real traffic and booking events exist:
-
-```text
-AI cost per conversation
-AI cost per IVR CTA acceptance
-AI cost per IVR website click
-AI cost per booking
-```
-
-Ultimately:
-
-```text
-AI-assisted acquisition cost
-vs
-CAC from other acquisition channels
-```
-
-## Current limitation
-
-No real IVR conversion data is available yet.
-
-Therefore the project instruments these metrics but does not report invented conversion results.
+No production conversion results are claimed.
 
 ---
 
-# Architecture Decision 001 — Do Not Use One Expensive Router for Every Request
+## Experiment 006 — Taxonomy v2 + RAG + Claude
 
-**Status:** Working hypothesis
-
-Current evidence suggests that neither pure rules nor pure semantic routing dominates all metrics.
-
-Observed trade-off:
-
-```text
-Native rules:
-best overall accuracy
-very low latency
-lower medical-safety recall
-
-Semantic router:
-better medical-safety recall
-lower overall accuracy
-higher compute/latency
-```
-
-A promising future architecture is therefore:
-
-```text
-deterministic medical-safety pre-gate
-↓
-cheap Ukrainian router
-↓
-high confidence?
-├─ yes → execute route
-└─ no  → semantic fallback
-```
-
-This would use expensive semantic reasoning only where it may add value.
-
-**Important:** this architecture has not yet been evaluated and is not presented as a measured final result.
-
----
-
-# Experiment Template
-
-Copy this section for every new run.
-
-## Experiment XXX — <name>
-
-**Date:** YYYY-MM-DD  
-**Status:** Planned / Running / Completed / Invalid
-
-### Question
-
-What exactly are we trying to learn?
-
-### Hypothesis
-
-What do we expect and why?
+**Status:** Working end-to-end demo
 
 ### Change
 
-What code, prompt, model, threshold, dataset or policy changed?
-
-### Dataset
+Replaced flat routing:
 
 ```text
-cases:
-slices:
-version:
+query → expected_route
 ```
 
-### Configuration
+with multidimensional routing:
 
 ```text
-model:
-threshold:
-routing policy:
-pricing assumption:
-other:
+primary_intent
+secondary_intent
+risk_class
+requested_action
+domain
+preferred_capability
+required_policy
+allowed_capabilities
+forbidden_capabilities
+needs_clarification
 ```
 
-### Metrics
+Core principle:
 
 ```text
-routing_accuracy:
-real_user_accuracy:
-medical_safety_recall:
-avg_latency_ms:
-input_tokens:
-output_tokens:
-estimated_api_cost_usd:
-cost_per_correct_route_usd:
-errors:
+preferred_capability
+= what should lead the response
+
+required_policy
+= what constraints must be applied
 ```
 
-### Failures / examples
+Medical safety is a policy overlay, not a competing topic.
 
-Record concrete cases, not only averages.
+### Demo results
 
-### Interpretation
+| Query | Capability | Policy | Result |
+|---|---|---|---|
+| `Що таке Health Psychology?` | health_psychology | none | RAG + Claude grounded answer |
+| Medication + exercise request | medical_safety_workflow | medical_safety | Unsafe individualized advice blocked |
+| High-risk symptoms | health_psychology | medical_safety | RAG context + deterministic safety + IVR navigation |
+| `Ергономічний стул` | health_psychology | none | Clarification allowed |
 
-What did the run actually teach us?
+Positive RAG control:
 
-### Decision
+```text
+Query: Що таке Health Psychology?
+Top retrieval score: 0.5333
+Source: Ogden 2019 Health Psychology
+Section: The Background of Health Psychology
+```
 
-Keep / revert / modify / investigate.
+High-risk case:
 
-### Next step
+```text
+Health Psychology RAG
+→ insufficient evidence for specific symptoms
 
-One concrete next experiment.
+medical_safety policy
+→ no diagnosis / treatment advice
+
+care navigation
+→ IVR professional consultation
+→ online or offline
+```
+
+**Finding:** Routing quality, safety policy and Knowledge Base coverage are separate concerns and should be evaluated separately.
 
 ---
 
-# Current Project Status
+## Experiment 007 — Taxonomy v2 Evaluation Contract
 
-As of 2026-09-02:
+**Status:** Completed
 
-```text
-Baseline                measured
-Strategy A              measured
-Strategy B              invalid — rerun required
-Strategy C              measured
-Conversation state      implemented
-Funnel instrumentation  implemented
-Location consent demo   implemented
-Final production router not selected yet
-```
-
-## Current strongest finding
-
-The final routing decision cannot be made from sophistication alone.
-
-The current data shows a real trade-off between:
+The previous evaluator used:
 
 ```text
-accuracy
-medical-safety recall
-latency
-tokens / compute
-cost
+correct = actual_route == expected_route
 ```
 
-The production strategy should be selected only after Strategy B is rerun successfully and the evaluation set is expanded.
+This was too rigid for multidimensional Health Psychology requests.
 
-## Architecture Decision 002 — Replace single-label routing ground truth
+The new evaluator separates:
 
-**Reason**
+```text
+preferred capability
+allowed capability
+risk class
+required policy
+medical-safety activation
+clarification appropriateness
+```
 
-The original `expected_route` design forced complex Health Psychology requests into one mutually exclusive category.
+### Evaluation set
 
-This does not fit the biopsychosocial product model, where pain, behaviour, emotional context, work functioning and medical risk may coexist in the same request.
+```text
+13 cases total
+6 controlled
+7 real-user-derived
+```
 
-**Decision**
+The old dataset is preserved as the `before` baseline:
 
-Future routing evaluation will use multidimensional labels instead of relying only on a single `expected_route`.
+```text
+data/routing_eval_ua.jsonl
+```
 
-Medical safety is treated as a policy overlay, not as a separate topic that replaces the Health Psychology context.
+The new multidimensional ground truth is stored separately:
 
-**Impact**
+```text
+data/routing_eval_v2.jsonl
+```
 
-The next benchmark should evaluate not only exact-route accuracy, but also whether the selected capability is acceptable and whether safety constraints are respected.
+### Results
+
+```text
+Preferred-capability accuracy:         100.0%
+Allowed-capability accuracy:           100.0%
+Risk-class accuracy:                    92.3%
+Required-policy accuracy:              100.0%
+Medical-safety recall:                 100.0%
+Unsafe-route rate:                       0.0%
+Clarification appropriateness:         100.0%
+Real-user allowed-capability accuracy: 100.0%
+Failed cases:                            0
+```
+These results are regression-test performance on the current 13-case evaluation set. The deterministic rules were iteratively refined against this small set, so the results should not be interpreted as held-out generalization or production performance.
+
+### Finding
+
+The multidimensional evaluator shows a stronger picture than flat route accuracy alone.
+
+The system correctly selected an allowed capability for every evaluated request, including all real-user-derived cases.
+
+All requests that required the `medical_safety` policy activated it.
+
+No evaluated request was routed outside its allowed capability set.
+
+Risk-class accuracy remained at 92.3%, showing that risk labelling and safety-policy activation are related but separate evaluation dimensions.
+
+### Decision
+
+Use Taxonomy v2 as the final `after` evaluation contract.
+
+Keep the original flat-routing evaluation only as the historical `before` baseline.
+
+---
+
+## Current Status
+
+```text
+Baseline routing          measured
+Strategy A                measured
+Strategy B                invalid
+Strategy C                measured
+Taxonomy v2               implemented
+Taxonomy v2 evaluation    completed
+Health Psychology RAG     connected
+Claude synthesis          connected
+Medical-safety overlay    implemented
+IVR care navigation       implemented
+Online/offline option     implemented
+Funnel observability      implemented
+```
+
+## Experiment 008 — Retrieval Runtime Caching
+
+**Status:** Completed
+
+### Motivation
+
+Runtime observability showed that local retrieval was unexpectedly slower than the Claude synthesis step.
+
+Before optimization:
+
+```text
+Average FAISS retrieval latency: 4722.84 ms
+Average Claude latency:          4032.69 ms
+```
+
+Inspection showed that the retrieval path reloaded the following components for every RAG turn:
+
+```text
+SentenceTransformer model
+FAISS index
+retrieval chunks
+```
+
+### Change
+
+The retrieval runtime was changed from per-request initialization to process-level reuse:
+
+```text
+first RAG turn
+→ load chunks
+→ load FAISS index
+→ load embedding model
+→ retrieve
+
+subsequent RAG turns
+→ reuse chunks
+→ reuse FAISS index
+→ reuse embedding model
+→ retrieve
+```
+
+The runtime objects are cached with:
+
+```text
+@lru_cache(maxsize=1)
+```
+
+The experiment was tracked separately as:
+
+```text
+experiment_id = taxonomy_v2_rag_demo_cached_v2
+```
+
+### Same 3-turn benchmark
+
+The same three requests were used before and after the change:
+
+```text
+1. General Health Psychology information
+2. Medication + exercise safety request
+3. High-risk symptom request
+```
+
+Runtime behavior remained:
+
+```text
+3 conversation turns
+3 taxonomy classifications
+2 retrieval calls
+2 Claude calls
+```
+
+The medication-safety request continued to use the deterministic safety workflow:
+
+```text
+LLM calls: 0
+tokens:    0
+LLM cost:  $0
+```
+
+### Results
+
+Before caching:
+
+```text
+Average retrieval latency: 4722.84 ms
+```
+
+After caching:
+
+```text
+Average retrieval latency: 2958.02 ms
+
+Cold retrieval:
+5456.57 ms
+
+Warm cached retrieval:
+459.48 ms
+```
+
+Warm-cache speedup:
+
+```text
+~11.9×
+```
+
+The post-cache Claude runtime was:
+
+```text
+Provider:                   Anthropic
+Model:                      claude-haiku-4-5-20251001
+LLM calls:                  2
+Input tokens:               1623
+Output tokens:              607
+Total tokens:               2230
+Estimated AI cost:          $0.004658
+Average cost per LLM call:  $0.002329
+Average Claude latency:     4383.73 ms
+```
+
+### Finding
+
+Observability exposed a system bottleneck that was not caused by the LLM.
+
+The main avoidable latency came from repeatedly initializing the local retrieval runtime.
+
+Caching the embedding model, FAISS index and retrieval chunks reduced warm retrieval latency from approximately 5.5 seconds to 0.46 seconds.
+
+The average post-cache retrieval latency still includes the first cold-start request, so warm-cache latency is the better indicator of steady-state performance.
+
+### Decision
+
+Keep process-level retrieval caching in the final architecture.
+
+Treat cold-start initialization separately from steady-state retrieval latency in future performance evaluation.
+
+Do not interpret this small local benchmark as a production latency benchmark.

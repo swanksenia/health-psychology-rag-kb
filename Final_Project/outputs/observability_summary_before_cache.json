@@ -1,0 +1,56 @@
+{
+  "runtime_summary": {
+    "conversations": 1,
+    "turns": 3,
+    "llm_calls": 2,
+    "input_tokens": 1658,
+    "output_tokens": 574,
+    "total_tokens": 2232,
+    "estimated_ai_cost_usd": 0.004528,
+    "average_ai_cost_per_turn_usd": 0.00150933,
+    "average_llm_calls_per_turn": 0.667
+  },
+  "llm_by_vendor_model": [
+    {
+      "experiment_id": "taxonomy_v2_rag_demo_v1",
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "prompt_version": "grounded_synthesis_v1",
+      "calls": 2,
+      "successful_calls": 2,
+      "failed_calls": 0,
+      "input_tokens": 1658,
+      "output_tokens": 574,
+      "total_tokens": 2232,
+      "total_cost_usd": 0.004528,
+      "average_cost_per_call_usd": 0.002264,
+      "average_latency_ms": 4032.69
+    }
+  ],
+  "steps": [
+    {
+      "step_name": "claude_grounded_synthesis",
+      "calls": 2,
+      "successful_calls": 2,
+      "failed_calls": 0,
+      "average_latency_ms": 4032.69,
+      "total_cost_usd": 0.004528
+    },
+    {
+      "step_name": "faiss_retrieval",
+      "calls": 2,
+      "successful_calls": 2,
+      "failed_calls": 0,
+      "average_latency_ms": 4722.84,
+      "total_cost_usd": 0.0
+    },
+    {
+      "step_name": "taxonomy_classification",
+      "calls": 3,
+      "successful_calls": 3,
+      "failed_calls": 0,
+      "average_latency_ms": 0.0,
+      "total_cost_usd": 0.0
+    }
+  ]
+}

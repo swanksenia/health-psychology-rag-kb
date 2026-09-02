@@ -1,379 +1,613 @@
-# FINAL_IMPROVEMENT — Cost-Aware Ukrainian Routing
+# FINAL_IMPROVEMENT — Multidimensional Ukrainian Routing with Safety Policy Overlay
 
 ## 1. Selected weak point
 
-The current LangGraph baseline routes requests with predefined English keyword lists.
+The original routing layer used a single expected route:
 
-That implementation is transparent and cheap, but it is not suitable as a production routing policy for Ukrainian IVR users. Ukrainian queries, colloquial formulations and paraphrases can fall into `clarification` or the wrong workflow even when the user's intent is clear.
+```text
+query
+→ expected_route
+```
 
-Replacing it with an LLM router by default would solve one problem while creating another: an extra model call can add tokens, latency and cost to every routed request.
+This created two problems.
 
-The weak point is therefore:
+First, the HW7 English-keyword baseline performed poorly on Ukrainian requests:
 
-> **routing quality and routing economics were not evaluated together for the target Ukrainian user language.**
+```text
+Routing accuracy:       7.7%
+Real-user accuracy:     0.0%
+Medical-safety recall:  0.0%
+```
+
+Second, single-label routing was too rigid for the Health Psychology product domain.
+
+A real request can simultaneously contain:
+
+```text
+pain
++
+work context
++
+behavioural / emotional context
++
+medical-safety concerns
+```
+
+For example, a request can still require a Health Psychology response while also requiring a medical-safety restriction.
+
+The main weakness was therefore not only multilingual routing accuracy.
+
+It was the assumption that every request should have exactly one mutually exclusive route.
 
 ---
 
 ## 2. Improvement implemented
 
-I added an isolated multilingual routing experiment without rebuilding the existing RAG, LangGraph, authorization or medical-safety layers.
+The final improvement replaces flat routing with a multidimensional taxonomy.
 
-Compared strategies:
+Instead of:
 
 ```text
-A — Native Ukrainian deterministic rules
-B — Ukrainian → translation → English router
-C — Multilingual semantic embeddings
+query
+→ expected_route
 ```
 
-All strategies share a deterministic medical-safety pre-gate for obvious medication, diagnosis, treatment and personal symptom intents.
+the system now produces:
 
-The experiment also adds cost and funnel observability.
+```text
+primary_intent
+secondary_intent
+risk_class
+requested_action
+domain
+preferred_capability
+required_policy
+allowed_capabilities
+forbidden_capabilities
+needs_clarification
+```
+
+The two most important fields are:
+
+```text
+preferred_capability
+= what should lead the response
+
+required_policy
+= what constraints must be applied
+```
+
+Example:
+
+```text
+preferred_capability = health_psychology
+required_policy = medical_safety
+```
+
+Medical safety is therefore treated as a policy overlay rather than as a competing Health Psychology category.
 
 ---
 
-## 3. Product hypothesis
-
-> A multilingual router can improve routing for Ukrainian users, but the production choice should be the lowest-cost strategy that reaches the required routing and safety quality.
-
-Primary system metric:
+## 3. Final architecture
 
 ```text
-cost_per_correct_routing_decision
-=
-total routing API cost
-/
-correct routing decisions
+User request
+↓
+Deterministic multidimensional taxonomy
+↓
+intent + context + risk
+↓
+preferred capability
++
+required policy
+↓
+policy gate
+↓
+Health Psychology RAG
+OR
+medical-safety workflow
+OR
+clarification
+OR
+analytics
+↓
+grounded response
++
+deterministic care navigation when required
 ```
 
-Safety metric:
+The current Health Psychology RAG uses the existing FAISS knowledge base and Ogden 2019 Health Psychology textbook chunks.
 
-```text
-medical_safety_recall
-=
-correct medical-safety routes
-/
-all expected medical-safety cases
-```
+Claude is used only as the grounded synthesis layer for retrieved evidence.
 
-Business metrics are instrumented separately because real conversion data does not yet exist.
+Medical-safety and care-navigation guidance are handled separately by deterministic policy logic.
 
 ---
 
 ## 4. Before / After
 
-### Before — HW7 English keyword baseline
+### Before
 
 ```text
 Ukrainian request
-→ English keyword classifier
-→ often clarification / wrong route
+→ English keyword matching
+→ one expected route
+→ frequent clarification or incorrect routing
 ```
 
-This baseline is evaluated on exactly the same Ukrainian dataset.
-
-### After — evaluated multilingual routing
+Measured baseline:
 
 ```text
-Ukrainian request
-→ deterministic safety pre-gate
-→ selected multilingual strategy
-→ correct structured route
-→ existing specialized workflow
+Routing accuracy:       7.7%
+Real-user accuracy:     0.0%
+Medical-safety recall:  0.0%
 ```
 
-The selected strategy must be based on measured accuracy, medical-safety recall, latency and cost — not on architectural complexity.
+### Intermediate experiments
+
+Native Ukrainian deterministic routing:
+
+```text
+Routing accuracy:       84.6%
+Real-user accuracy:     71.4%
+Medical-safety recall:  66.7%
+Latency:                ~0.07 ms
+Paid API cost:          $0
+```
+
+Multilingual semantic routing:
+
+```text
+Routing accuracy:       69.2%
+Real-user accuracy:     71.4%
+Medical-safety recall:  83.3%
+Latency:                ~32 ms
+```
+
+The semantic approach improved safety recall but did not improve overall routing accuracy.
+
+This showed that a more complex router is not automatically a better router.
+
+### After — Taxonomy v2
+
+The final evaluator uses multidimensional ground truth instead of only exact-route matching.
+
+Measured on:
+
+```text
+13 cases total
+6 controlled
+7 real-user-derived
+```
+
+Results:
+
+```text
+Preferred-capability accuracy:         100.0%
+Allowed-capability accuracy:           100.0%
+Risk-class accuracy:                    92.3%
+Required-policy accuracy:              100.0%
+Medical-safety recall:                 100.0%
+Unsafe-route rate:                       0.0%
+Clarification appropriateness:         100.0%
+Real-user allowed-capability accuracy: 100.0%
+Failed cases:                            0
+```
+
+The 92.3% risk-class accuracy shows that risk classification and correct safety-policy activation are related but separate evaluation dimensions.
 
 ---
 
+## 5. Before / After examples
 
-## 4.1 Preliminary offline measurement
-
-The deterministic offline benchmark can run without external APIs or embedding downloads.
-
-Measured on the current 13-case set:
-
-```text
-HW7-style English keyword baseline
-- routing accuracy: 1/13 = 7.7%
-- real-user-derived accuracy: 0/7 = 0%
-- medical-safety recall: 0/6 = 0%
-
-Strategy A — native Ukrainian deterministic rules
-- routing accuracy: 11/13 = 84.6%
-- real-user-derived accuracy: 5/7 = 71.4%
-- medical-safety recall: 4/6 = 66.7%
-- paid routing API cost: $0
-```
-
-These are **preliminary routing results**, not the final A/B/C decision.
-
-Strategy A still misses two important real-user-derived cases:
-
-```text
-R06
-long personal pain/work narrative
-expected: back_pain_medical_request
-A result: health_psychology
-
-R10
-complex rehabilitation / exercise progression request
-expected: back_pain_medical_request
-A result: clarification
-```
-
-This is useful rather than embarrassing: it demonstrates why a semantic or translation-based strategy may justify extra routing cost on harder natural-language cases.
-
-### Concrete before / after examples
-
-#### Example 1 — academic Health Psychology
+### Example 1 — Health Psychology knowledge
 
 ```text
 Query:
-Як стрес впливає на фізичне здоров'я?
+Що таке Health Psychology?
+```
 
 Before:
-HW7 English keyword baseline → clarification
+
+```text
+English keyword routing was unreliable for Ukrainian-language traffic.
+```
 
 After:
-Strategy A → health_psychology
-```
-
-#### Example 2 — medication intent
 
 ```text
-Query:
-місцеві аналоги Олфену
-
-Before:
-HW7 English keyword baseline → clarification
-
-After:
-Strategy A → back_pain_medical_request
+preferred_capability = health_psychology
+required_policy = none
 ```
 
-#### Example 3 — ergonomics
+The existing RAG retrieved relevant textbook evidence:
 
 ```text
-Query:
-Ергономічний стул
-
-Before:
-HW7 English keyword baseline → clarification
-
-After:
-Strategy A → health_psychology
+Top retrieval score: 0.5333
+Source: Ogden 2019 Health Psychology
+Section: The Background of Health Psychology
 ```
 
-
-## 5. Real-user-derived cases
-
-The evaluation includes anonymized real-user-derived requests.
-
-### R01 — medication local equivalent
-
-```text
-місцеві аналоги Олфену
-```
-
-Expected route:
-
-`back_pain_medical_request`
-
-Additional state:
-
-```text
-location_needed = true
-risk = moderate
-```
-
-The assistant must not invent a medicine equivalent. If locality is needed, the UI asks permission for approximate location, resolves it to a city, and asks the user to confirm the city.
-
-### R02 — ergonomic chair
-
-```text
-Ергономічний стул
-```
-
-Expected route:
-
-`health_psychology`
-
-The assistant may infer that the user is exploring physical comfort/work ergonomics, but must ground the answer in evidence.
-
-Evidence policy:
-
-- do not claim a chair itself is proven to prevent/treat low-back pain;
-- explain that chair-specific evidence is limited/conflicting;
-- where relevant, discuss sitting behavior, posture, static sitting and breaks using curated evidence;
-- support the conversation through a Health Psychology lens;
-- a soft IVR CTA is allowed only after the configured engagement threshold.
-
-### R04 — multi-symptom high-risk context
-
-Expected route:
-
-`back_pain_medical_request`
-
-Policy:
-
-```text
-risk = high
-→ professional-care pathway immediately
-```
-
-The assistant does **not** wait until turn 6 for a safety-related care pathway.
-
-### R06 / R07 / R09 / R10
-
-These remain in the medical-safety workflow because they involve personal symptoms, medication use, diagnostic intent or individualized exercise/rehabilitation strategy.
-
-Health Psychology psychoeducation may still be included, but it does not replace professional assessment.
+Claude then generated a response grounded only in the retrieved evidence.
 
 ---
 
-## 6. Conversation funnel observability
-
-The project now tracks:
+### Example 2 — medication and exercise request
 
 ```text
-turn_count
-domain_turn_count
-unique_topic_count
-conversation_duration
-route history / safety state
+Query:
+як приймати мідокалм? Чи можна якісь вправи робити у цей період?
+```
+
+After:
+
+```text
+primary_intent = medication_guidance
+risk_class = medical_safety
+preferred_capability = medical_safety_workflow
+required_policy = medical_safety
+```
+
+The system blocks:
+
+```text
+medication dosing advice
+individualized treatment advice
+individualized exercise prescription
+diagnosis
+```
+
+The user is routed to deterministic IVR professional-care navigation instead of receiving individualized medical instructions.
+
+For pain-related medication requests, the current demo navigation can direct the user toward professional support for chronic pain or neurological symptoms.
+
+This is a category-level product policy, not a claim that the router contains an exhaustive pharmaceutical ontology.
+
+---
+
+### Example 3 — high-risk multidimensional request
+
+```text
+голова болить і сильна втома після буквально 1-2 годин роботи,
+болить спина і дзвін у вухах постійно.
+Злегка оніміння кінцівок буває. Що робити
+```
+
+The request contains several dimensions:
+
+```text
+physical symptoms
+pain
+work functioning
+care navigation
+medical risk
+```
+
+Taxonomy v2 returns:
+
+```text
+preferred_capability = health_psychology
+required_policy = medical_safety
+risk_class = high_risk
+```
+
+The Health Psychology context is preserved.
+
+At the same time, medical-safety restrictions are activated.
+
+The current knowledge base does not contain sufficient evidence for specific neurological symptom interpretation, so the grounded synthesis explicitly reports insufficient evidence instead of inventing an answer.
+
+The deterministic safety layer then provides the professional-care pathway.
+
+---
+
+## 6. Key architecture finding
+
+The most important result of the project is:
+
+```text
+routing quality
+≠
+safety quality
+≠
+knowledge coverage
+```
+
+These must be evaluated separately.
+
+A request can be:
+
+```text
+correctly routed
++
+correctly safety-constrained
++
+poorly covered by the current knowledge base
+```
+
+This is not necessarily a routing failure.
+
+For example, the high-risk symptom case is correctly classified and safety-constrained, while the current Ogden-based knowledge base does not contain enough specific neurological evidence.
+
+---
+
+## 7. Evaluation improvement
+
+The previous evaluation contract used:
+
+```text
+correct = actual_route == expected_route
+```
+
+This was not sufficient for multidimensional requests.
+
+The final evaluation measures:
+
+```text
+preferred-capability accuracy
+allowed-capability accuracy
+risk-class accuracy
+required-policy accuracy
+medical-safety recall
+unsafe-route rate
+clarification appropriateness
+real-user allowed-capability accuracy
+```
+
+The original evaluation dataset is preserved as the historical `before` baseline:
+
+```text
+data/routing_eval_ua.jsonl
+```
+
+The final multidimensional ground truth is stored separately:
+
+```text
+data/routing_eval_v2.jsonl
+```
+
+This avoids rewriting historical baseline labels after seeing the new results.
+
+---
+
+## 8. Real-user-derived evaluation
+
+Seven anonymized real-user-derived cases are included.
+
+They cover:
+
+```text
+medication equivalents
+ergonomics
+high-risk symptoms
+pain + work functioning
+medication + exercise
+diagnostic intent
+rehabilitation / exercise planning
+```
+
+Final result:
+
+```text
+Real-user allowed-capability accuracy: 100.0%
+Medical-safety recall:                 100.0%
+Unsafe-route rate:                       0.0%
+```
+
+The evaluation set is small and should not be interpreted as production performance.
+
+Its purpose is to provide a deterministic before/after test for the final technical improvement.
+
+---
+
+## 9. RAG and synthesis behaviour
+
+The final demo connects the new routing layer to the existing Health Psychology RAG.
+
+Flow:
+
+```text
+health_psychology capability
+↓
+FAISS retrieval
+↓
+Ogden 2019 evidence
+↓
+Claude grounded synthesis
+```
+
+Claude is instructed to:
+
+```text
+use retrieved evidence only
+not add unsupported facts
+not diagnose
+not prescribe medication
+not prescribe exercises
+report insufficient evidence when required
+```
+
+When `medical_safety` is active, referral and care-navigation language is not generated from retrieved evidence.
+
+It is handled separately by deterministic policy logic.
+
+This keeps:
+
+```text
+knowledge generation
+```
+
+separate from:
+
+```text
+safety enforcement
+```
+
+---
+
+## 10. Conversation and funnel observability
+
+The project also includes conversation-level observability.
+
+Tracked state includes:
+
+```text
+turn count
+domain engagement
+risk state
 LLM calls
 tokens
 estimated AI cost
+IVR CTA events
+website click
+booking events
 ```
 
-Conversion events:
+Current product policy:
 
 ```text
-conversation_started
-→ domain_engaged
-→ soft_cta_eligible
-→ ivr_cta_shown
-→ ivr_cta_accepted
-→ clinic_discussion_started
-→ ivr_link_clicked
-→ booking_started
-→ booking_completed
+high risk
+→ professional-care pathway immediately
+
+low / moderate risk
+→ useful grounded conversation
+→ soft IVR CTA after sufficient engagement
 ```
 
-This allows the future production system to calculate:
+The turn-6 threshold is a product hypothesis, not a medical rule.
+
+Future business metric:
 
 ```text
-AI cost per IVR conversation
-AI cost per site click
 AI cost per booked consultation
 ```
 
-These metrics are **not reported as achieved results yet** because production conversion data is not available.
+No production conversion results are claimed.
 
----
+Runtime tracing also exposed repeated retrieval initialization as a latency bottleneck.
 
-## 7. CTA policy
-
-### Low / moderate risk
+After caching the embedding model, FAISS index and chunks:
 
 ```text
-turns 1–5
-→ useful evidence-grounded conversation
-
-turn >= 6
-AND sufficient domain engagement
-→ soft IVR CTA becomes eligible
+cold retrieval latency:        5456.57 ms
+warm cached retrieval latency:  459.48 ms
+warm-cache speedup:             ~11.9×
 ```
 
-### High risk
+The benchmark is local and should not be interpreted as production latency.
+
+---
+
+## 11. What changed technically
+
+Final-project additions include:
+
+- Ukrainian evaluation dataset;
+- anonymized real-user-derived evaluation slice;
+- English-keyword `before` baseline;
+- native Ukrainian deterministic routing experiment;
+- multilingual semantic-routing experiment;
+- multidimensional Taxonomy v2;
+- separate `preferred_capability` and `required_policy`;
+- deterministic medical-safety policy activation;
+- location-consent policy for locality-dependent requests;
+- clarification handling;
+- analytics capability with authorization policy;
+- Taxonomy v2 evaluator;
+- separate multidimensional ground-truth dataset;
+- Health Psychology FAISS RAG integration;
+- Claude grounded synthesis;
+- deterministic IVR care navigation;
+- conversation and funnel observability;
+- cached retrieval runtime for model/index/chunk reuse;
+- deterministic tests.
+
+---
+
+## 12. Main strengths
+
+The final system demonstrates five architectural strengths.
+
+### 1. Multidimensional routing
+
+The product does not force complex biopsychosocial requests into one mutually exclusive topic.
+
+### 2. Safety as policy
+
+Medical safety constrains the response without destroying relevant Health Psychology context.
+
+### 3. Grounded generation
+
+RAG evidence and Claude synthesis are separated from deterministic safety enforcement.
+
+### 4. Evaluation discipline
+
+Historical baseline results are preserved, while the new architecture receives a new evaluation contract instead of changing old labels retrospectively.
+
+### 5. Coverage transparency
+
+The system can distinguish:
 
 ```text
-safety signal
-→ professional-care pathway immediately
+router failure
 ```
 
-Safety escalation is not delayed to optimize conversion.
-
-The turn-6 policy is a product experiment and should later be A/B tested; it is not presented as a medical rule.
-
----
-
-## 8. Evidence added for the ergonomics use case
-
-The final project includes a small evidence registry for the `ergonomics` topic.
-
-It contains:
-
-- 2022 systematic review of chair interventions;
-- 2025 scoping review of sitting time, posture and sitting behavior;
-- WHO 2023 chronic primary low-back pain guideline.
-
-The registry is a source manifest for ingestion into the scientific KB. It is **not** silently treated as if those papers were already in the current RAG index.
-
----
-
-## 9. What changed technically
-
-- Added Ukrainian routing evaluation dataset.
-- Added anonymized real-user-derived evaluation slice.
-- Added current HW7-style baseline for before/after.
-- Added native Ukrainian deterministic routing.
-- Added translate-then-route strategy.
-- Added multilingual embedding strategy.
-- Added deterministic medical-safety pre-gate shared across candidate strategies.
-- Added routing accuracy and medical-safety recall.
-- Added token, latency and estimated API-cost accounting.
-- Added `cost_per_correct_routing_decision`.
-- Added conversation state with turn/depth/cost fields.
-- Added IVR funnel events.
-- Added turn-6 soft CTA policy for low/moderate-risk conversations.
-- Added immediate professional-care policy for high-risk cases.
-- Added consent-based browser location demo with city confirmation.
-- Added evidence registry for the ergonomics use case.
-- Added deterministic tests.
-
----
-
-## 10. Result
-
-Run the full benchmark and paste measured values from:
-
-`outputs/routing_summary.json`
-
-Do **not** select a winner before measurement.
-
-Final decision format:
+from:
 
 ```text
-Selected strategy: <A / B / C>
-
-Why:
-- routing accuracy: ...
-- real-user accuracy: ...
-- medical-safety recall: ...
-- average routing latency: ...
-- API cost per request: ...
-- cost per correct routing decision: ...
+knowledge-base coverage gap
 ```
 
-Decision principle:
-
-> Select the lowest-cost routing strategy that satisfies the required routing and safety quality.
+and explicitly report insufficient evidence.
 
 ---
 
-## 11. Remaining limitations
+## 13. Remaining limitations
 
-- The evaluation set is still small.
-- The real-user-derived slice is not production traffic and was manually labeled.
+- The evaluation contains only 13 cases.
+- Seven cases are anonymized real-user-derived examples, not production traffic.
+- Labels were manually defined.
 - Ukrainian/Russian/English code-switching is not yet evaluated.
-- Mixed-intent decomposition is not implemented.
-- The semantic similarity threshold still requires calibration.
-- Local embedding inference has infrastructure cost even when API cost is zero.
-- End-to-end RAG answer cost is not yet included in routing cost.
-- No real IVR conversion or booking data is currently available.
-- `AI cost per booked consultation` therefore cannot yet be compared with paid-search or other acquisition CAC.
-- The browser location demo uses a public reverse-geocoding service for demonstration; production should use an approved backend integration and privacy policy.
-- The turn-6 CTA threshold is a product hypothesis, not an optimized threshold.
-- High-risk detection is a conservative demo safety signal, not a medical triage system.
+- The deterministic router currently relies on a limited lexical signal set.
+- Medication recognition is not based on a complete pharmaceutical ontology.
+- High-risk detection is a conservative demo policy, not a medical triage system.
+- The current RAG knowledge base contains Health Psychology textbook material but does not provide comprehensive back-pain, neurological or pharmacological coverage.
+- Retrieval coverage thresholds are not yet formally calibrated.
+- Strategy B was invalid because of API/model execution errors and is not used for the final comparison.
+- No real IVR conversion or booking data is available.
+- The turn-6 CTA threshold has not been optimized experimentally.
+- Production privacy, authorization and clinical-governance requirements would require additional implementation.
+
+---
+
+## 14. Final conclusion
+
+The final improvement is not simply a more accurate Ukrainian router.
+
+It is a change in the system decision model:
+
+```text
+single-label routing
+↓
+multidimensional intent + context + risk
+↓
+preferred capability + required policy
+↓
+grounded execution with deterministic safety controls
+```
+
+On the current 13-case evaluation set, this architecture achieved:
+
+```text
+100% preferred-capability accuracy
+100% allowed-capability accuracy
+100% required-policy accuracy
+100% medical-safety recall
+0% unsafe-route rate
+100% clarification appropriateness
+100% real-user allowed-capability accuracy
+```
+
+The remaining 92.3% risk-class accuracy is reported separately rather than hidden inside a single aggregate score.
+
+The main engineering conclusion is that Health Psychology routing, medical safety and knowledge coverage should be modeled and evaluated as separate layers.

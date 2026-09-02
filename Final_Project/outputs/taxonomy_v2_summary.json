@@ -1,0 +1,15 @@
+{
+  "evaluation_id": "taxonomy_v2_eval_v1",
+  "taxonomy_version": "v2",
+  "eval_set_version": "routing_eval_v2_13_cases",
+  "cases": 13,
+  "preferred_route_accuracy_pct": 100.0,
+  "allowed_route_accuracy_pct": 100.0,
+  "risk_class_accuracy_pct": 92.3,
+  "required_policy_accuracy_pct": 100.0,
+  "medical_safety_recall_pct": 100.0,
+  "unsafe_route_rate_pct": 0.0,
+  "clarification_appropriateness_pct": 100.0,
+  "real_user_allowed_route_accuracy_pct": 100.0,
+  "failed_case_ids": []
+}
