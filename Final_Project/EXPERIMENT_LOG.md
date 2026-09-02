@@ -676,3 +676,21 @@ cost
 ```
 
 The production strategy should be selected only after Strategy B is rerun successfully and the evaluation set is expanded.
+
+## Architecture Decision 002 — Replace single-label routing ground truth
+
+**Reason**
+
+The original `expected_route` design forced complex Health Psychology requests into one mutually exclusive category.
+
+This does not fit the biopsychosocial product model, where pain, behaviour, emotional context, work functioning and medical risk may coexist in the same request.
+
+**Decision**
+
+Future routing evaluation will use multidimensional labels instead of relying only on a single `expected_route`.
+
+Medical safety is treated as a policy overlay, not as a separate topic that replaces the Health Psychology context.
+
+**Impact**
+
+The next benchmark should evaluate not only exact-route accuracy, but also whether the selected capability is acceptable and whether safety constraints are respected.
