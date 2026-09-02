@@ -1,0 +1,4 @@
+strategy_id,strategy,routing_model_policy,generation_model_policy,safety_model_policy,escalation_enabled,expected_model_calls,main_advantage,main_risk,status
+S1,Strong Model Everywhere,strong_model,strong_model,strong_model,False,baseline workflow calls,Simple execution policy and potentially strong quality across tasks.,Pays strong-model price even for simple routing and low-risk requests.,TARGET_EXPERIMENT
+S2,Cheap First + Escalation,cheap_model_first,cheap_model_first,escalate_when_required,True,one or more calls depending on escalation,Can reduce average task cost when many tasks are simple.,Retries and escalation may increase latency and erase apparent savings.,TARGET_EXPERIMENT
+S3,Workflow-Specific Models,lightweight_or_semantic_router,capability_specific_model,stronger_model_or_policy_gate,True,depends on selected workflow,Allows cost and quality optimization by capability.,"More configuration, evaluation, and observability complexity.",TARGET_EXPERIMENT

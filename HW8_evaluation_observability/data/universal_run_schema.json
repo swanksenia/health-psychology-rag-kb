@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "run_identity": {
+    "run_id": null,
+    "case_id": null,
+    "journey_id": null,
+    "timestamp": null,
+    "environment": null
+  },
+  "input": {
+    "user_query": null,
+    "user_role": null,
+    "language": null,
+    "risk_level": null,
+    "expected_behavior": null
+  },
+  "model": {
+    "provider": null,
+    "model_name": null,
+    "model_role": null,
+    "strategy": null,
+    "temperature": null
+  },
+  "trajectory": {
+    "selected_capability": null,
+    "selected_route": null,
+    "executed_nodes": [],
+    "model_calls": [],
+    "tool_calls": [],
+    "backend_operations": [],
+    "retry_count": 0,
+    "fallback_count": 0,
+    "escalation_count": 0,
+    "handoff_count": 0,
+    "loop_count": 0
+  },
+  "retrieval": {
+    "retrieval_used": null,
+    "retrieval_type": null,
+    "top_k": null,
+    "retrieved_document_ids": [],
+    "retrieved_chunk_ids": [],
+    "retrieval_scores": [],
+    "retrieval_latency_ms": null,
+    "recall_at_k": null,
+    "precision_at_k": null,
+    "mrr": null,
+    "ndcg": null,
+    "context_relevance": null
+  },
+  "tools": {
+    "tool_call_count": null,
+    "tool_success_count": null,
+    "tool_error_count": null,
+    "tool_retry_count": null,
+    "repeated_tool_calls": null,
+    "tool_latency_ms": null
+  },
+  "backend": {
+    "backend_operation_count": null,
+    "backend_success_count": null,
+    "backend_error_count": null,
+    "backend_retry_count": null,
+    "backend_latency_ms": null
+  },
+  "quality": {
+    "task_success": null,
+    "routing_correct": null,
+    "authorization_correct": null,
+    "required_steps_correct": null,
+    "forbidden_steps_correct": null,
+    "tool_use_correct": null,
+    "groundedness": null,
+    "citation_correctness": null,
+    "answer_quality": null,
+    "completeness": null,
+    "final_verdict": null,
+    "failure_type": null
+  },
+  "safety": {
+    "safety_required": null,
+    "safety_pass": null,
+    "diagnosis_avoided": null,
+    "prescribing_avoided": null,
+    "write_confirmation_present": null,
+    "policy_violation": null,
+    "safety_note": null
+  },
+  "performance": {
+    "total_latency_ms": null,
+    "ttft_ms": null,
+    "time_to_first_event_ms": null,
+    "routing_latency_ms": null,
+    "retrieval_latency_ms": null,
+    "model_latency_ms": null,
+    "tool_latency_ms": null,
+    "backend_latency_ms": null
+  },
+  "usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "cached_tokens": null,
+    "reasoning_tokens": null,
+    "embedding_tokens": null,
+    "judge_tokens": null,
+    "total_tokens": null,
+    "model_call_count": null
+  },
+  "cost": {
+    "model_cost_usd": null,
+    "embedding_cost_usd": null,
+    "judge_cost_usd": null,
+    "tool_related_model_cost_usd": null,
+    "backend_cost_usd": null,
+    "retry_cost_usd": null,
+    "escalation_cost_usd": null,
+    "total_cost_usd": null,
+    "cost_per_request_usd": null,
+    "cost_per_successful_task_usd": null,
+    "cost_per_safe_successful_task_usd": null
+  },
+  "cost_guardrail": {
+    "max_model_calls": null,
+    "max_tool_calls": null,
+    "max_retries": null,
+    "max_total_tokens": null,
+    "max_estimated_cost_usd": null,
+    "budget_exceeded": null,
+    "guardrail_action": null
+  },
+  "evaluation": {
+    "automatic_grading_used": null,
+    "manual_review_required": null,
+    "manual_review_reason": null,
+    "judge_used": null,
+    "judge_provider": null,
+    "judge_model": null,
+    "manual_verdict": null,
+    "review_note": null
+  }
+}

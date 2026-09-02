@@ -1,0 +1,6 @@
+guardrail_id,guardrail,field,default_value,unit,scope,trigger_action,purpose
+G01,Maximum Model Calls,max_model_calls,4.0,calls,per task,stop additional model calls and return controlled fallback,Prevent repeated model invocation or hidden agent loops.
+G02,Maximum Tool Calls,max_tool_calls,6.0,calls,per task,stop repeated tool execution and return controlled fallback,Prevent repeated or unnecessary backend/tool operations.
+G03,Maximum Retries,max_retries,2.0,retries,per task,stop retry loop and use fallback or escalation policy,Prevent retry-driven latency and cost growth.
+G04,Maximum Total Tokens,max_total_tokens,,tokens,per task,"truncate optional context, use fallback, or stop",Prevent uncontrolled prompt and generation growth.
+G05,Maximum Estimated Cost,max_estimated_cost_usd,,USD,per task,"stop, fallback, or require explicit escalation decision",Ensure workflow cost remains economically acceptable.

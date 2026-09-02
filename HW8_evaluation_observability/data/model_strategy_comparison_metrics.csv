@@ -1,0 +1,13 @@
+metric,importance
+task_success_rate,PRIMARY
+safe_task_success_rate,PRIMARY
+routing_accuracy,PRIMARY
+total_latency_ms,PRIMARY
+input_tokens,DIAGNOSTIC
+output_tokens,DIAGNOSTIC
+model_call_count,PRIMARY
+retry_count,PRIMARY
+escalation_count,PRIMARY
+total_cost_usd,PRIMARY
+cost_per_request_usd,SECONDARY
+cost_per_successful_task_usd,PRIMARY

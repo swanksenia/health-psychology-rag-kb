@@ -1,0 +1,8 @@
+homework,title,capability,primary_artifact,artifact_exists,evaluation_focus
+HW1,Knowledge Base,knowledge_base,data/notebooks/HW1_prepare_knowledge_base_lebedieva.ipynb,True,"source ingestion, chunking, metadata, source traceability"
+HW2,Semantic Retrieval,semantic_retrieval,data/notebooks/HW2_Semantic_Retrieval.ipynb,True,"semantic retrieval quality, top-k results, retrieval latency"
+HW3,Improved Retrieval,improved_retrieval,data/notebooks/HW3_Improved_Retrieval.ipynb,True,"baseline vs improved retrieval, reranking, Recall@K, Top-1 quality"
+HW4,RAG Answer Generation,rag_generation,data/notebooks/HW4_Agentic_Prompt_Workflow.ipynb,True,"answer quality, groundedness, citations, model usage, latency, token cost"
+HW5,External Tool,external_tools,data/notebooks/HW5_External_Tool_Analytics.ipynb,True,"tool selection, authorization, execution, errors, latency"
+HW6,Agentic Workflow,agentic_workflow,data/notebooks/HW6_Agentic_Workflow.ipynb,True,"workflow steps, safety gates, state, tool behavior, task completion"
+HW7,LangGraph Orchestration,langgraph_orchestration,HW7_langgraph_orchestration/scripts/langgraph_orchestrator.py,True,"routing, authorization, required/forbidden nodes, tool execution, traces, latency"

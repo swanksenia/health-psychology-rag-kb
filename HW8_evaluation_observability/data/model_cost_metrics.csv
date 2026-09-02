@@ -1,0 +1,21 @@
+metric_id,metric,category,definition,formula
+MC01,task_success_rate,quality,Share of runs that successfully complete the product task.,successful_tasks / total_tasks
+MC02,safe_task_success_rate,quality,Share of safety-sensitive runs that complete successfully without violating safety requirements.,safe_successful_tasks / safety_sensitive_tasks
+MC03,routing_accuracy,quality,Share of routing decisions that select the expected capability or workflow.,correct_routes / routing_cases
+MC04,input_tokens,usage,Provider-reported input token usage.,provider_usage
+MC05,output_tokens,usage,Provider-reported output token usage.,provider_usage
+MC06,cached_tokens,usage,Provider-reported cached input token usage where available.,provider_usage
+MC07,embedding_tokens,usage,Tokens used for embedding or retrieval-query generation.,embedding_usage
+MC08,judge_tokens,usage,Tokens consumed by semantic or LLM-as-a-judge evaluation.,judge_usage
+MC09,model_call_count,runtime_efficiency,Number of model calls required to complete one task.,count(model_calls)
+MC10,retry_count,runtime_efficiency,Number of retry attempts made during a task.,count(retries)
+MC11,escalation_count,runtime_efficiency,Number of transitions from a cheaper / smaller model to a stronger model.,count(escalations)
+MC12,total_latency_ms,performance,End-to-end task latency.,run_finished - run_started
+MC13,ttft_ms,performance,Time to first generated token where streaming is available.,first_token - request_started
+MC14,model_cost_usd,economics,Cost of model inference based on actual provider usage and versioned pricing.,input_cost + output_cost + cache_cost + reasoning_cost
+MC15,embedding_cost_usd,economics,Cost of embedding calls used by the run.,embedding_usage × embedding_price
+MC16,judge_cost_usd,economics,Cost of semantic evaluation / LLM judge calls.,judge_usage × judge_model_price
+MC17,total_cost_usd,economics,Total measured runtime cost of one product task.,model_cost + embedding_cost + judge_cost + backend_cost
+MC18,cost_per_request_usd,economics,Average cost of processing one request regardless of outcome.,total_cost / total_requests
+MC19,cost_per_successful_task_usd,economics,Average system cost required to produce one successful task.,total_cost / successful_tasks
+MC20,cost_per_correct_routing_decision_usd,economics,Average routing cost required to produce one correct routing decision.,routing_cost / correct_routes

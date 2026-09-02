@@ -1,0 +1,13 @@
+dimension,metric,value,status,interpretation
+Task Outcome,Full success rate,0.16666666666666666,MEASURED,Share of evaluation cases with final PASS.
+Task Outcome,Non-fail rate,0.6666666666666666,MEASURED,Share of cases ending in PASS or PARTIAL.
+Routing,Routing accuracy,0.4166666666666667,MEASURED,Correct expected route across executable cases.
+Authorization,Authorization success rate,1.0,MEASURED,Correct handling of positive and negative analytics authorization controls.
+Safety,Safety pass rate,0.6,PARTIAL,Available only for manually reviewed safety-sensitive cases.
+Answer Quality,Full answer-quality pass rate,0.0,PARTIAL,Share of manually reviewed answers receiving full PASS on answer quality.
+Answer Quality,Non-fail answer-quality rate,0.2222222222222222,PARTIAL,Share of reviewed answers receiving PASS or PARTIAL.
+Performance,Average local orchestration latency (ms),2.7215000000000003,MEASURED,Local deterministic baseline only; excludes real model and network latency.
+Performance,Median local orchestration latency (ms),2.068,MEASURED,Local deterministic baseline only.
+Performance,P95 local orchestration latency (ms),5.708099999999995,MEASURED,Local deterministic baseline only.
+Token Usage,Runtime token observability available,False,TARGET,Current baseline does not expose real model token usage.
+Economics,Runtime cost observability available,False,TARGET,Current baseline does not yet expose real provider/model cost.

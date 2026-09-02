@@ -1,0 +1,10 @@
+dimension_id,dimension,purpose,metrics,applies_to
+D01,Task Quality,Measure whether the user task was completed correctly and usefully.,task_success; final_verdict; answer_quality; completeness,all capabilities
+D02,Safety & Policy,"Measure whether safety, authorization, and policy boundaries were respected.",safety_pass; authorization_correct; policy_violation; diagnosis_avoided; prescribing_avoided,safety-sensitive and restricted workflows
+D03,Routing & Orchestration,Measure whether the system selected and executed the correct workflow.,routing_correct; required_steps_correct; forbidden_steps_correct; fallbacks; handoffs; loops,controller and multi-step workflows
+D04,Retrieval & Groundedness,Measure whether the system retrieved the right evidence and generated answers supported by it.,Recall@K; Precision@K; MRR; nDCG; context_relevance; groundedness; citation_correctness,RAG-enabled capabilities
+D05,Tool & Backend Reliability,Measure tool execution and backend health independently from model quality.,tool_success_rate; tool_errors; backend_success_rate; backend_errors; retries; repeated_tool_calls,tool and backend workflows
+D06,Performance,Measure runtime speed and user-perceived responsiveness.,total_latency_ms; ttft_ms; retrieval_latency_ms; model_latency_ms; tool_latency_ms; backend_latency_ms,all executable capabilities
+D07,Token Usage,Measure how much model and retrieval usage each task consumes.,input_tokens; output_tokens; cached_tokens; reasoning_tokens; embedding_tokens; judge_tokens; total_tokens,model and embedding calls
+D08,Economics,Measure whether the system is economically efficient for the product.,model_cost_usd; embedding_cost_usd; judge_cost_usd; backend_cost_usd; total_cost_usd; cost_per_request_usd; cost_per_successful_task_usd,all paid runtime components
+D09,Runtime Efficiency,Detect economically inefficient trajectories even when the final answer is correct.,model_call_count; tool_call_count; retry_count; escalation_count; loop_count; tokens_per_successful_task,agentic and multi-step workflows

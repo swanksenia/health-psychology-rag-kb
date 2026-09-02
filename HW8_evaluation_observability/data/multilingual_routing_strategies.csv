@@ -1,0 +1,4 @@
+strategy_id,strategy,flow,translation_call,semantic_retrieval,additional_model_call_expected,current_availability,main_hypothesis
+ML_A,Native Ukrainian,Ukrainian query -> route directly,False,False,False,CURRENT_BASELINE,"Lowest architectural overhead, but current keyword routing may generalize poorly to Ukrainian natural-language requests."
+ML_B,Translate then route,Ukrainian query -> English translation -> route,True,False,True,TARGET_EXPERIMENT,"English routing may improve accuracy, but translation adds tokens, latency, cost, and another possible failure point."
+ML_C,Multilingual Semantic / RAG Routing,Ukrainian query -> multilingual semantic retrieval -> capability selection,False,True,False,TARGET_EXPERIMENT,"May improve multilingual generalization without a mandatory translation step, but introduces retrieval / embedding cost."
