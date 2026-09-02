@@ -31,17 +31,55 @@ HW6  Controlled Workflow + Medical Safety + IVR
  ↓
 HW7  LangGraph Orchestration
  ↓
-HW8  Evaluation + Observability
+HW8  Product-Wide Evaluation + Observability
 ```
+
+This sequence describes the **implementation history** of the project.
+
+Homework 8 does not evaluate the homework assignments themselves.
+
+Instead, the current system is evaluated as a product through:
+
+```text
+Product Capabilities
+        ↓
+Product User Journeys
+        ↓
+Evaluation Dimensions
+        ↓
+Case-Level Evaluation Contracts
+        ↓
+Executable Runs
+        ↓
+Deterministic Checks
+        ↓
+Selective Semantic Review
+        ↓
+Product Scorecard
+        ↓
+Architecture Decisions
+```
+
+The main current and target product capabilities are:
+
+- Health Psychology Expert
+- Analytics Assistant
+- Safety & Authorization Layer
+- RAG-Assisted Controller
+- Support / Booking Assistant
+- Model / Vendor Layer
+- Observability & Cost Control
+
+Earlier homework implementations are therefore treated as **implementation evidence and historical baselines** for these product capabilities.
 
 Homework 7 introduced explicit orchestration with LangGraph.
 
 The current workflow routes requests between:
 
-- Health Psychology retrieval;
-- product analytics;
-- access-denied handling;
-- clarification.
+- Health Psychology retrieval
+- product analytics
+- access-denied handling
+- clarification
 
 It also introduced explicit state and execution traces through fields such as:
 
@@ -55,7 +93,7 @@ final_answer
 executed_nodes
 ```
 
-This made the workflow easier to inspect and created a useful foundation for run-level evaluation.
+This created the first executable baseline for product-level evaluation.
 
 ---
 
@@ -180,39 +218,59 @@ flowchart TD
 
     USER[User Request] --> CONTEXT[Request Context]
 
-    CONTEXT --> ROUTER[RAG-Assisted Controller]
+    CONTEXT --> POLICY[Safety / Authorization Gates]
+
+    POLICY --> ROUTER[RAG-Assisted Capability Controller]
 
     ROUTER --> SKILLS[Retrieve Relevant Capability Definitions]
 
-    SKILLS --> DECISION{Routing Decision}
+    SKILLS --> DECISION{Structured Routing Decision}
 
-    DECISION -->|Academic question| HPSY[Health Psychology Skill]
+    DECISION -->|Academic / domain question| HPSY[Health Psychology Expert]
     DECISION -->|Personal medical context| MED[Medical Safety Workflow]
-    DECISION -->|Product analytics| AUTH[Authorization Gate]
+    DECISION -->|Product analytics| ANALYTICS[Analytics Assistant]
+    DECISION -->|Support / booking| SUPPORT[Support / Booking Assistant]
     DECISION -->|Ambiguous| CLAR[Clarification]
     DECISION -->|Unsupported| NOANS[No-answer / Unsupported]
 
     HPSY --> KRAG[Scientific Knowledge RAG]
+    KRAG --> SYNTH[Grounded Answer Generation]
 
     MED --> MRAG[Retrieve Relevant Psychoeducational Evidence]
     MRAG --> SAFETY[Deterministic Medical Safety Boundary]
-
-    AUTH -->|admin| ANALYTICS[Analytics Tool]
-    AUTH -->|external user| DENY[Access Denied]
-
-    KRAG --> SYNTH[Constrained Answer Synthesis]
     SAFETY --> SYNTH
 
-    ANALYTICS --> FINAL[Final Answer]
+    ANALYTICS --> AUTH[Authorization Gate]
+    AUTH -->|authorized| AEXEC[Analytics Tool / Text2SQL Workflow]
+    AUTH -->|unauthorized| DENY[Access Denied]
+
+    SUPPORT --> SRAG[Service / Doctor Retrieval]
+    SRAG --> STOOL[Availability / Booking Tools]
+
+    SYNTH --> FINAL[Final Answer]
+    AEXEC --> FINAL
     DENY --> FINAL
+    STOOL --> FINAL
     CLAR --> FINAL
     NOANS --> FINAL
-    SYNTH --> FINAL
 
-    FINAL --> TRACE[Trace + Evaluation Metrics]
+    FINAL --> OBS[Observability Layer]
+
+    OBS --> METRICS[
+        Quality / Routing / Safety /
+        Latency / Tokens / Retries / Cost
+    ]
+
+    METRICS --> GUARD[Runtime Cost Guardrails]
+
+    MODEL[Model / Vendor Strategy] --> ROUTER
+    MODEL --> SYNTH
+    MODEL --> AEXEC
 ```
 
-The important architectural change is that retrieval now has **two different responsibilities**.
+The target architecture keeps LangGraph as the orchestration runtime while evolving the routing, generation, safety, observability, and cost-control layers.
+
+The system remains a **single domain-specific assistant with specialized workflows**, rather than a collection of autonomous agents.
 
 ---
 
