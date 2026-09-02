@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IVR Location Consent Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 680px; margin: 40px auto; padding: 0 20px; }
+    button { padding: 10px 14px; margin: 6px 6px 6px 0; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 18px; }
+    #confirm { display: none; margin-top: 16px; }
+    .note { color: #555; font-size: 0.92rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Локація для локального запиту</h2>
+    <p>
+      Щоб зорієнтуватися щодо локально доступних варіантів, можна використати
+      приблизне місцезнаходження. Дозволити?
+    </p>
+    <button id="allow">Дозволити</button>
+    <button id="deny">Не зараз</button>
+    <p id="status" class="note"></p>
+
+    <div id="confirm">
+      <p>Схоже, ви зараз у <strong id="city"></strong>. Правильно?</p>
+      <button id="yes">Так</button>
+      <button id="no">Ні, вкажу місто сама/сам</button>
+    </div>
+  </div>
+
+<script>
+const statusEl = document.getElementById("status");
+const confirmEl = document.getElementById("confirm");
+const cityEl = document.getElementById("city");
+
+let detectedCity = null;
+
+async function reverseGeocode(latitude, longitude) {
+  // Demo-only public reverse geocoding endpoint.
+  // Production: use an approved backend provider and do not persist exact coordinates.
+  const url =
+    "https://api.bigdatacloud.net/data/reverse-geocode-client" +
+    `?latitude=${encodeURIComponent(latitude)}` +
+    `&longitude=${encodeURIComponent(longitude)}` +
+    "&localityLanguage=uk";
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Reverse geocoding failed.");
+  const data = await response.json();
+
+  return data.city || data.locality || data.principalSubdivision || data.countryName;
+}
+
+document.getElementById("allow").onclick = () => {
+  if (!navigator.geolocation) {
+    statusEl.textContent = "Ваш браузер не підтримує геолокацію.";
+    return;
+  }
+
+  statusEl.textContent = "Очікую дозвіл браузера…";
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      try {
+        const { latitude, longitude } = position.coords;
+        detectedCity = await reverseGeocode(latitude, longitude);
+
+        // Exact coordinates are intentionally not stored.
+        cityEl.textContent = detectedCity || "невідомому місті";
+        confirmEl.style.display = "block";
+        statusEl.textContent = "";
+      } catch (error) {
+        statusEl.textContent =
+          "Не вдалося визначити місто. Запитайте місто текстом у чаті.";
+      }
+    },
+    () => {
+      statusEl.textContent =
+        "Локацію не надано. Запитайте місто текстом у чаті.";
+    },
+    { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+  );
+};
+
+document.getElementById("deny").onclick = () => {
+  statusEl.textContent =
+    "Добре. Якщо місто буде потрібне, бот попросить вказати його вручну.";
+};
+
+document.getElementById("yes").onclick = () => {
+  statusEl.textContent = `Підтверджене місто: ${detectedCity}`;
+  confirmEl.style.display = "none";
+};
+
+document.getElementById("no").onclick = () => {
+  const corrected = prompt("Вкажіть ваше місто:");
+  if (corrected) {
+    statusEl.textContent = `Підтверджене місто: ${corrected}`;
+    confirmEl.style.display = "none";
+  }
+};
+</script>
+</body>
+</html>

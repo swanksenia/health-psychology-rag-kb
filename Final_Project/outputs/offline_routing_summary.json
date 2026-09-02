@@ -1,0 +1,32 @@
+[
+  {
+    "strategy": "BASELINE_HW7_english_keywords",
+    "requests": 13,
+    "correct": 1,
+    "routing_accuracy": 0.07692307692307693,
+    "real_user_accuracy": 0.0,
+    "medical_safety_recall": 0.0,
+    "avg_latency_ms": 0.02677453846025366,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "estimated_api_cost_usd": 0.0,
+    "cost_per_request_usd": 0.0,
+    "cost_per_correct_route_usd": 0.0,
+    "errors": 0
+  },
+  {
+    "strategy": "A_native_ukrainian_rules",
+    "requests": 13,
+    "correct": 11,
+    "routing_accuracy": 0.8461538461538461,
+    "real_user_accuracy": 0.7142857142857143,
+    "medical_safety_recall": 0.6666666666666666,
+    "avg_latency_ms": 0.05802861539030765,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "estimated_api_cost_usd": 0.0,
+    "cost_per_request_usd": 0.0,
+    "cost_per_correct_route_usd": 0.0,
+    "errors": 0
+  }
+]

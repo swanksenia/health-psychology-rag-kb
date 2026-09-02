@@ -1,0 +1,31 @@
+{
+  "soft_cta_after_turn": 6,
+  "minimum_domain_turns_for_soft_cta": 3,
+  "high_risk_policy": "professional_care_pathway_immediately",
+  "location_policy": {
+    "request_only_when_needed": true,
+    "require_browser_permission": true,
+    "confirm_city_with_user": true,
+    "store_precise_coordinates": false,
+    "store_confirmed_city_only": true
+  },
+  "medical_boundary": {
+    "diagnosis_allowed": false,
+    "medication_recommendation_allowed": false,
+    "exercise_prescription_allowed": false,
+    "treatment_prescription_allowed": false,
+    "psychoeducation_allowed": true,
+    "professional_referral_allowed": true
+  },
+  "business_events": [
+    "conversation_started",
+    "domain_engaged",
+    "soft_cta_eligible",
+    "ivr_cta_shown",
+    "ivr_cta_accepted",
+    "clinic_discussion_started",
+    "ivr_link_clicked",
+    "booking_started",
+    "booking_completed"
+  ]
+}

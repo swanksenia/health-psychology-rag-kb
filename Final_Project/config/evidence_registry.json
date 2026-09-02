@@ -1,0 +1,34 @@
+{
+  "ergonomics": {
+    "claim_policy": "Do not claim that an ergonomic chair itself is proven to prevent or treat low back pain. Present the evidence as mixed/limited and, when relevant, discuss sitting behavior, posture, breaks, and workplace context without prescribing individualized treatment.",
+    "sources": [
+      {
+        "source_id": "CHAIR_REVIEW_2022",
+        "title": "The effects of chair intervention on lower back pain, discomfort and trunk muscle activation in office workers: a systematic review",
+        "authors": "Channak S, Klinsophon T, Janwantanakul P",
+        "journal": "International Journal of Occupational Safety and Ergonomics",
+        "year": 2022,
+        "pmid": "33970803",
+        "doi": "10.1080/10803548.2021.1928379",
+        "supported_summary": "The review found very-low- to low-quality and conflicting evidence for chair interventions on low-back pain/discomfort and did not support recommending a chair intervention solely to reduce low-back pain or discomfort."
+      },
+      {
+        "source_id": "SITTING_REVIEW_2025",
+        "title": "Low back pain and sitting time, posture and behavior in office workers: A scoping review",
+        "authors": "Alaca N, Acar AO, Öztürk S",
+        "journal": "Journal of Back and Musculoskeletal Rehabilitation",
+        "year": 2025,
+        "pmid": "40111906",
+        "doi": "10.1177/10538127251320320",
+        "supported_summary": "Across 22 studies, sitting behavior showed the strongest association with low-back pain; longer sitting, poorer posture, fewer breaks and more static sitting were reported as associated factors."
+      },
+      {
+        "source_id": "WHO_LBP_2023",
+        "title": "WHO guideline for non-surgical management of chronic primary low back pain in adults in primary and community care settings",
+        "publisher": "World Health Organization",
+        "year": 2023,
+        "supported_summary": "WHO recommends a holistic, person-centred approach to chronic primary low-back pain and includes education, selected physical interventions, psychological interventions and other evidence-based care options."
+      }
+    ]
+  }
+}
