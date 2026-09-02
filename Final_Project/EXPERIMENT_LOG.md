@@ -2,22 +2,14 @@
 
 ## Purpose
 
-This document is the working experiment and decision log for the Final Project:
+Experiment and decision log for the Final Project.
 
-**IVR Health Psychology & Chronic Back Pain Domain-Specific Expert Assistant — Cost-Aware Ukrainian Routing**
-
-It records:
-
-- hypotheses;
-- implementation changes;
-- evaluation runs;
+Tracks:
+- test runs;
 - measured results;
-- failures and bugs;
+- failures;
 - architecture decisions;
-- remaining questions;
-- next experiments.
-
-The goal is to keep measured evidence separate from assumptions and to avoid rewriting project history after the fact.
+- next steps.
 
 ---
 
